@@ -1,0 +1,36 @@
+name: Deploy DEV (Lightsail)
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'user/**'
+      - '.github/workflows/deploy-dev.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Rsync only user/ (themes, pages, config)
+      - name: Rsync user/ to DEV
+        uses: burnett01/rsync-deployments@5.2
+        with:
+          switches: -az --delete
+          path: user/
+          remote_path: /var/www/scottnandrew-dev/user/
+          remote_host: ${{ secrets.SSH_HOST }}
+          remote_user: ${{ secrets.SSH_USER }}
+          remote_key: ${{ secrets.SSH_KEY }}
+
+      - name: Clear Grav cache
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /var/www/scottnandrew-dev
+            php bin/grav clear-cache
