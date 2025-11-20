@@ -11,10 +11,33 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      # Rsync only user/ (themes, pages, config)
+    steps:
+      - name: Checkout
+      # If you use submodules in user/themes/artist, add: with: submodules: true
+        uses: actions/checkout@v4
+
+      - name: Debug: show host/user (safe)
+        run: |
+          echo "HOST=${{ secrets.SSH_HOST }}"
+          echo "USER=${{ secrets.SSH_USER }}"
+          echo "Repo root contents:" && ls -la
+          echo "User dir:" && ls -la user || true
+          echo "Artist theme:" && ls -la user/themes/artist || true
+
+      - name: Debug: SSH connectivity test
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            set -e
+            whoami
+            hostname
+            ls -ld /var/www/scottnandrew-dev/user || true
+            command -v php && php -v || true
+
       - name: Rsync user/ to DEV
         uses: burnett01/rsync-deployments@5.2
         with:
@@ -32,5 +55,6 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
+            set -e
             cd /var/www/scottnandrew-dev
             php bin/grav clear-cache
