@@ -40,7 +40,7 @@ jobs:
       - name: "Rsync user/ to DEV"
         uses: burnett01/rsync-deployments@5.2
         with:
-          switches: -az --delete
+          switches: -az --delete --omit-dir-times --no-perms --no-owner --no-group
           path: user/
           remote_path: /var/www/scottnandrew-dev/user/
           remote_host: ${{ secrets.SSH_HOST }}
