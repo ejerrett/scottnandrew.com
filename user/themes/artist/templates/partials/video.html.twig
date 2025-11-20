@@ -1,0 +1,49 @@
+{# Usage examples (in page content, since Twig-in-content is enabled):
+   {% include 'partials/video.html.twig' with { provider: 'vimeo', id: '473193113' } %}
+   {% include 'partials/video.html.twig' with { provider: 'vimeo', id: '473193113', width: 800, height: 450 } %}
+   {% include 'partials/video.html.twig' with { provider: 'youtube', id: 'dQw4w9WgXcQ', width: 720, height: 405 } %}
+
+   Optional:
+   - max_width overrides the cap (defaults to width)
+   - fullbleed: true makes it edge-to-edge, still honoring aspect ratio
+#}
+
+{% set p   = provider|lower %}
+{% set vid = id %}
+{% set w   = width|default(700) %}
+{% set h   = height|default(394) %}
+{% set cap = max_width|default(w) %}
+{% set full = fullbleed|default(false) %}
+
+{% if p == 'vimeo' %}
+  {% set src = 'https://player.vimeo.com/video/' ~ vid ~ '?title=0&byline=0&portrait=0&playsinline=1' %}
+{% else %}
+  {# privacy-enhanced YouTube #}
+  {% set src = 'https://www.youtube-nocookie.com/embed/' ~ vid ~ '?modestbranding=1&rel=0&playsinline=1' %}
+{% endif %}
+
+{% if full %}
+  <div class="my-8">
+    <div class="w-full rounded-lg overflow-hidden ring-1 ring-white/10" style="aspect-ratio: {{ w }} / {{ h }};">
+      <iframe
+        class="w-full h-full"
+        src="{{ src }}"
+        title="{{ title|default('Video') }}"
+        loading="lazy"
+        allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+        referrerpolicy="origin-when-cross-origin"></iframe>
+    </div>
+  </div>
+{% else %}
+  <div class="mx-auto my-8" style="max-width: {{ cap }}px;">
+    <div class="w-full rounded-lg overflow-hidden ring-1 ring-white/10" style="aspect-ratio: {{ w }} / {{ h }};">
+      <iframe
+        class="w-full h-full"
+        src="{{ src }}"
+        title="{{ title|default('Video') }}"
+        loading="lazy"
+        allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+        referrerpolicy="origin-when-cross-origin"></iframe>
+    </div>
+  </div>
+{% endif %}

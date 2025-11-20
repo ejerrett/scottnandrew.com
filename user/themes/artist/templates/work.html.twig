@@ -1,0 +1,116 @@
+{% extends 'partials/base.html.twig' %}
+
+{% set w = page.header.work %}
+{% set images = page.media.images %}
+
+{# layout toggles from front-matter (defaults) #}
+{% set show_hero = page.header.layout.show_hero|default(false) %}
+
+{# optional hero if explicitly enabled #}
+{% set hero = images[page.header.images.hero] ?? images|first %}
+
+{% block content %}
+<article class="max-w-5xl mx-auto py-8">
+
+  <header class="mb-6">
+    <h1 class="text-3xl font-semibold">{{ page.title }}</h1>
+    <p class="text-white/70 mt-1">
+      {% if w.year %}{{ w.year }}{% endif %}
+      {% if w.medium %} · {{ w.medium }}{% endif %}
+      {% if w.dimensions %} · {{ w.dimensions }}{% endif %}
+      {% if w.location %} · {{ w.location }}{% endif %}
+    </p>
+  </header>
+
+  {% if show_hero and hero %}
+    <figure class="mb-8">
+      <img src="{{ hero.url }}" alt="{{ page.title }} — hero"
+           class="w-full h-auto rounded-lg ring-1 ring-white/10" />
+    </figure>
+  {% endif %}
+
+  {# Your body: mix text, images, and video partials anywhere you want #}
+  <div class="prose prose-invert max-w-none mb-10">
+    {{ page.content|raw }}
+  </div>
+
+  {# ---- Bottom Gallery (optional) ---- #}
+  {# Priority 1: explicit list in header.images.gallery
+     Priority 2: otherwise auto from all page.media.images #}
+  {% set gallery_list = page.header.images.gallery ?? [] %}
+  {% set gallery = [] %}
+
+  {% if gallery_list|length > 0 %}
+    {% for filename in gallery_list %}
+      {% if images[filename] %}{% set gallery = gallery|merge([images[filename]]) %}{% endif %}
+    {% endfor %}
+  {% else %}
+    {% for name, img in images %}
+      {% set gallery = gallery|merge([img]) %}
+    {% endfor %}
+  {% endif %}
+
+  {% if gallery|length > 0 %}
+    <section class="mt-12">
+      <h2 class="text-xl font-semibold mb-4">Gallery</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        {% for img in gallery %}
+          <a href="{{ img.url }}" class="block group" data-full="{{ img.url }}" aria-label="Open image {{ loop.index }}">
+            <img src="{{ img.url }}"
+                 alt="{{ img.meta.alt|default(page.title ~ ' — ' ~ loop.index) }}"
+                 class="w-full h-auto rounded-lg ring-1 ring-white/10 group-hover:opacity-90 transition" />
+          </a>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+</article>
+{% endblock %}
+
+{% block body_end %}
+  {{ parent() }}
+  {# Lightweight lightbox: click any thumb to open full-size overlay #}
+  <div id="lb" class="fixed inset-0 hidden items-center justify-center bg-black/80 z-50 p-4">
+    <button id="lbClose" class="absolute top-4 right-4 w-10 h-10 rounded bg-white/10 hover:bg-white/20"
+            aria-label="Close image">
+      <svg viewBox="0 0 24 24" class="w-6 h-6"><path fill="currentColor" d="M18.3 5.71 12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.3 19.71 2.89 18.3 9.17 12 2.89 5.71 4.3 4.3l6.29 6.3 6.29-6.3z"/></svg>
+    </button>
+    <img id="lbImg" src="" alt="" class="max-w-[95vw] max-h-[90vh] rounded-lg ring-1 ring-white/20" />
+  </div>
+  <script>
+    (function(){
+      const lb = document.getElementById('lb');
+      const lbImg = document.getElementById('lbImg');
+      const lbClose = document.getElementById('lbClose');
+      const thumbs = document.querySelectorAll('[data-full]');
+      function open(src){ lbImg.src = src; lb.classList.remove('hidden'); document.documentElement.style.overflow='hidden'; }
+      function close(){ lb.classList.add('hidden'); lbImg.src=''; document.documentElement.style.overflow=''; }
+      thumbs.forEach(a => a.addEventListener('click', e => { e.preventDefault(); open(a.getAttribute('data-full')); }));
+      lbClose.addEventListener('click', close);
+      lb.addEventListener('click', e => { if(e.target===lb) close(); });
+      window.addEventListener('keydown', e => { if(e.key==='Escape') close(); });
+    })();
+  </script>
+  {% set siblings = page.parent.children.order('date','desc') %}
+{% set prev = null %}
+{% set next = null %}
+{% for p in siblings %}
+  {% if p.route == page.route %}
+    {% set prev = loop.first ? null : siblings[loop.index0 - 1] %}
+    {% set next = loop.last ? null : siblings[loop.index0 + 1] %}
+  {% endif %}
+{% endfor %}
+
+{% if prev or next %}
+  <nav class="mt-12 flex items-center justify-between text-white/80">
+    <div>
+      {% if prev %}<a class="hover:underline" href="{{ prev.url }}">← {{ prev.title }}</a>{% endif %}
+    </div>
+    <div>
+      {% if next %}<a class="hover:underline" href="{{ next.url }}">{{ next.title }} →</a>{% endif %}
+    </div>
+  </nav>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="{{ grav.language.getActive ?: 'en' }}">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% if header.title %}{{ header.title }} — {% endif %}{{ site.title|default('Artist Portfolio') }}</title>
+
+  {# Dark theme #}
+  <script src="https://cdn.tailwindcss.com?plugins=typography,aspect-ratio"></script>
+  <style>
+  :root { --header-h: 88px; }          /* fallback before JS sets real header height */
+  .swiper, .swiper-wrapper, .swiper-slide { height: 100%; }  /* critical! */
+  .swiper-slide > a { display:block; height:100%; }           /* ensure inner link fills slide */
+</style>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { panel: { DEFAULT: '#0a0a0a' } }
+        }
+      }
+    }
+  </script>
+  <style>
+    .caption-shadow { text-shadow: 0 1px 10px rgba(0,0,0,.45); }
+    .scrollbar-thin::-webkit-scrollbar { width: 8px; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 8px; }
+  </style>
+  {% block head_extra %}{% endblock %}
+</head>
+
+<body class="bg-black text-white antialiased selection:bg-white/20">
+  {# ───────────────── Header (title + desktop nav) ───────────────── #}
+  <header class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <!-- Hamburger (always visible) -->
+      <button id="openDrawer"
+              class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-white/5 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white"
+              aria-label="Open menu" aria-haspopup="dialog" aria-controls="sidebar" aria-expanded="false">
+        <!-- icon -->
+        <svg viewBox="0 0 24 24" class="w-6 h-6"><path fill="currentColor" d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+      </button>
+
+      <a href="{{ base_url == '' ? '/' : base_url_absolute }}" class="text-xl sm:text-2xl font-semibold tracking-tight">
+        {{ site.title|default('Artist Portfolio') }}
+      </a>
+    </div>
+
+    <!-- Desktop nav (hidden on small screens) -->
+    <nav class="hidden lg:flex items-center gap-6 text-sm">
+      {% for p in pages.children if p.visible %}
+        <a class="hover:text-gray-300" href="{{ p.url }}">{{ p.menu }}</a>
+      {% endfor %}
+    </nav>
+  </header>
+
+  {# ───────────────── Left drawer (overlay) ───────────────── #}
+  <div id="backdrop" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden" aria-hidden="true"></div>
+
+  <aside id="sidebar"
+         class="fixed inset-y-0 left-0 w-80 max-w-[85vw] bg-panel border-r border-white/10 translate-x-[-100%] transition-transform duration-300 will-change-transform z-40"
+         role="dialog" aria-modal="true" aria-label="Site menu">
+    <div class="h-full flex flex-col">
+      <div class="flex items-center justify-between px-4 py-4 border-b border-white/10">
+        <span class="font-semibold">{{ site.title|default('Artist') }}</span>
+        <button id="closeDrawer" class="w-9 h-9 rounded-lg bg-white/5 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white" aria-label="Close menu">
+          <svg viewBox="0 0 24 24" class="w-6 h-6"><path fill="currentColor" d="M18.3 5.71 12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.3 19.71 2.89 18.3 9.17 12 2.89 5.71 4.3 4.3l6.29 6.3 6.29-6.3z"/></svg>
+        </button>
+      </div>
+
+      <nav class="p-4 space-y-4 overflow-y-auto scrollbar-thin">
+        {# Top-level pages #}
+        <div>
+          <ul class="space-y-1">
+            {% for p in pages.children if p.visible and (not works_root or p.route != works_root.route) %}
+              <li><a class="block rounded-md px-3 py-2 hover:bg-white/10" href="{{ p.url }}">{{ p.menu }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+
+
+      {% set works_root = pages.find('/works') ?: pages.find('/work') %}
+{% if works_root %}
+  {% set sections = works_root.children.order('order', 'asc') %}
+  <div>
+    <h2 class="text-xs uppercase tracking-widest text-white/50 mt-6 mb-2">Works</h2>
+    <ul class="space-y-1">
+      {% for s in sections %}
+        <li class="mb-1">
+          <a class="block rounded-md px-3 py-2 hover:bg-white/10" href="{{ s.url }}">{{ s.menu|default(s.title) }}</a>
+
+          {# Infer preview collection like the landing template #}
+          {% set src = s.header.source|default(null) %}
+          {% set cat = s.header.category|default(null) %}
+          {% set oby = s.header.order_by|default('date') %}
+          {% set dir = s.header.order_dir|default('desc') %}
+          {% if not src %}
+            {% set slug = s.slug|lower %}
+            {% if slug == 'featured' %}
+              {% set src = 'featured' %}
+            {% elseif slug in ['performance','freelance','mediadesign','installation','video','photography'] %}
+              {% set src = 'category' %}
+              {% set cat = slug %}
+            {% else %}
+              {% set src = 'featured' %}
+            {% endif %}
+          {% endif %}
+
+          {% if src == 'featured' %}
+            {% set preview = s.collection({'items': {'@taxonomy': {'tag': ['featured']}}, 'order': {'by': oby, 'dir': dir}}).slice(0,5) %}
+          {% else %}
+            {% set preview = s.collection({'items': {'@taxonomy': {'category': [cat]}}, 'order': {'by': oby, 'dir': dir}}).slice(0,5) %}
+          {% endif %}
+
+          {% if preview|length %}
+            <ul class="mt-1 ml-3 space-y-1 text-sm text-white/80">
+              {% for w in preview %}
+                <li><a class="block rounded px-2 py-1 hover:bg-white/10" href="{{ w.url }}">{{ w.title }}</a></li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endif %}
+
+
+
+      </nav>
+    </div>
+  </aside>
+
+  {# ───────────────── Main content ───────────────── #}
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    {% block content %}{% endblock %}
+  </main>
+
+  {# No footer per your request #}
+
+  {% block body_end %}
+  <script>
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('backdrop');
+    const openBtn = document.getElementById('openDrawer');
+    const closeBtn = document.getElementById('closeDrawer');
+
+    function openDrawer() {
+      sidebar.style.transform = 'translateX(0)';
+      backdrop.classList.remove('hidden');
+      openBtn.setAttribute('aria-expanded', 'true');
+      document.documentElement.style.overflow = 'hidden';
+      // Focus trap start
+      sidebar.focus();
+    }
+    function closeDrawer() {
+      sidebar.style.transform = 'translateX(-100%)';
+      backdrop.classList.add('hidden');
+      openBtn.setAttribute('aria-expanded', 'false');
+      document.documentElement.style.overflow = '';
+    }
+    openBtn?.addEventListener('click', openDrawer);
+    closeBtn?.addEventListener('click', closeDrawer);
+    backdrop?.addEventListener('click', closeDrawer);
+    window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+  </script>
+  {% endblock %}
+</body>
+</html>

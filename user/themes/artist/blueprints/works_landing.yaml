@@ -1,0 +1,47 @@
+title: Works Landing
+'@extends':
+  type: default
+  context: blueprints://pages
+
+form:
+  fields:
+    tabs:
+      type: tabs
+      active: 1
+      fields:
+        content:
+          type: tab
+          title: Content
+          fields:
+            header.source:
+              type: select
+              label: Source
+              options:
+                featured: Featured (tag: featured)
+                category: Category
+              default: featured
+
+            header.category:
+              type: select
+              label: Category
+              options:
+                performance: Performance
+                installation: Installation
+                video: Video
+                photography: Photography
+              show_when:
+                header.source: category
+
+            header.order_by:
+              type: select
+              label: Order by
+              options:
+                date: Date
+                title: Title
+              default: date
+
+            header.order_dir:
+              type: select
+              label: Order direction
+              options: { desc: Descending, asc: Ascending }
+              default: desc

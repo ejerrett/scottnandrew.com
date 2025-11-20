@@ -1,0 +1,24 @@
+{% extends 'partials/base.html.twig' %}
+{% set collection = page.collection() %}
+{% block content %}
+<section class="py-6">
+  <h1 class="text-3xl font-semibold mb-8">{{ page.title }}</h1>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for p in collection %}
+      {% set hero = p.media.images[p.header.images.hero] ?? p.media.images|first %}
+      <a href="{{ p.url }}" class="block rounded-lg overflow-hidden bg-white/5 hover:bg-white/10 transition group ring-1 ring-white/10">
+        {% if hero %}
+          <img src="{{ hero.url }}" alt="{{ p.title }}" class="w-full h-56 object-cover group-hover:opacity-90 transition" />
+        {% endif %}
+        <div class="p-4">
+          <h2 class="font-semibold text-lg">{{ p.title }}</h2>
+          {% if p.header.work.year %}<p class="text-sm text-white/60">{{ p.header.work.year }}</p>{% endif %}
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+  {% if config.plugins.pagination.enabled and collection.params.pagination %}
+    <div class="mt-10">{% include 'partials/pagination.html.twig' with { base_url: page.url, pagination: collection.params.pagination } %}</div>
+  {% endif %}
+</section>
+{% endblock %}

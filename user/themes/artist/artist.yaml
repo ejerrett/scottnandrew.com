@@ -1,0 +1,7 @@
+name: Artist
+version: 0.1.0
+description: Minimal Tailwind-based portfolio theme for Grav
+icon: palette
+author: Ethan Jerrett
+email: scottnandrew@ethanjerrett.net
+license: MIT

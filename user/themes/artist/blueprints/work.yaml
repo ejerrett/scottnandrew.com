@@ -1,0 +1,48 @@
+title: Work
+'@extends':
+  type: default
+  context: blueprints://pages
+
+form:
+  fields:
+    tabs:
+      type: tabs
+      active: 1
+      fields:
+        content:
+          type: tab
+          title: Content
+          fields:
+            header.layout.show_hero:
+              type: toggle
+              label: Show Hero at Top
+              help: If on, shows the hero image above the content area.
+              highlight: 0
+              default: 0
+              options: { 1: 'On', 0: 'Off' }
+
+            header.images.hero:
+              type: filepicker
+              label: Hero Image (optional)
+              preview_images: true
+              accept:
+                - .jpg
+                - .jpeg
+                - .png
+                - .webp
+
+            header.images.gallery:
+              type: list
+              label: Gallery Images (optional; orderable)
+              style: vertical
+              help: If empty, all images in the folder will be used.
+              fields:
+                .:
+                  type: filepicker
+                  preview_images: true
+                  label: Image
+                  accept:
+                    - .jpg
+                    - .jpeg
+                    - .png
+                    - .webp

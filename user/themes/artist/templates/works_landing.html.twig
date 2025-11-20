@@ -1,0 +1,108 @@
+{% extends 'partials/base.html.twig' %}
+
+{# ----- Build a collection robustly ----- #}
+{% set src = page.header.source|default(null) %}
+{% set cat = page.header.category|default(null) %}
+{% set oby = page.header.order_by|default('date') %}
+{% set dir = page.header.order_dir|default('desc') %}
+
+{# Infer from slug if not set in header #}
+{% if not src %}
+  {% set slug = page.slug|lower %}
+  {% if slug == 'featured' %}
+    {% set src = 'featured' %}
+  {% elseif slug in ['performance','freelance','mediadesign','installation','video','photography'] %}
+    {% set src = 'category' %}
+    {% set cat = slug %}
+  {% else %}
+    {% set src = 'featured' %}
+  {% endif %}
+{% endif %}
+
+{# Build collection. Use array values for taxonomy filters (most reliable). #}
+{% if src == 'featured' %}
+  {% set collection = page.collection({
+    items: {'@taxonomy': {'tag': ['featured']}},
+    order: {'by': oby, 'dir': dir}
+  }) %}
+{% else %}
+  {% set collection = page.collection({
+    items: {'@taxonomy': {'category': [cat]}},
+    order: {'by': oby, 'dir': dir}
+  }) %}
+{% endif %}
+
+{% set slider_id = 'slider-' ~ page.id %}
+
+{% block head_extra %}
+  {{ parent() }}
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+{% endblock %}
+
+{% block content %}
+<section class="pb-8">
+  {% if collection|length == 0 %}
+    <div class="min-h-[40vh] flex items-center justify-center text-white/60">
+      <p>No works found for this section. Check taxonomy (category/tag) and that each work has at least one image.</p>
+    </div>
+  {% else %}
+    {# BEFORE: style="min-height: calc(100svh - var(--header-h, 88px));" #}
+<div id="{{ slider_id }}" class="swiper rounded-none overflow-hidden ring-1 ring-white/10"
+     style="height: calc(100vh - var(--header-h, 88px));">
+
+      <div class="swiper-wrapper">
+        {% for p in collection %}
+          {% set hero = p.media.images[p.header.images.hero] ?? p.media.images|first %}
+          <div class="swiper-slide">
+            <a href="{{ p.url }}" class="block relative w-full h-full">
+              <div class="absolute inset-0 bg-black"></div>
+              {% if hero %}
+                <img src="{{ hero.url }}" alt="{{ p.title }}"
+                     class="absolute inset-0 w-full h-full object-cover"
+                     loading="{{ loop.first ? 'eager' : 'lazy' }}">
+              {% endif %}
+              <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent"></div>
+              <div class="absolute left-4 right-4 bottom-4 sm:left-8 sm:right-8 sm:bottom-8">
+                <h2 class="text-2xl sm:text-3xl font-semibold caption-shadow">{{ p.title }}</h2>
+                {% if p.header.work.year %}
+                  <p class="text-white/80 caption-shadow">{{ p.header.work.year }}</p>
+                {% endif %}
+              </div>
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="swiper-pagination !bottom-4"></div>
+      <div class="swiper-button-prev hidden sm:flex"></div>
+      <div class="swiper-button-next hidden sm:flex"></div>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}
+
+{% block body_end %}
+  {{ parent() }}
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <script>
+    (function(){
+      const header = document.querySelector('header');
+      function setHeaderH(){ document.documentElement.style.setProperty('--header-h', (header?.offsetHeight||88)+'px'); }
+      window.addEventListener('load', setHeaderH);
+      window.addEventListener('resize', setHeaderH);
+    })();
+
+    new Swiper('#{{ slider_id }}', {
+      loop: true,
+      slidesPerView: 1,
+      effect: 'fade',
+      fadeEffect: { crossFade: true },
+      speed: 600,
+      autoplay: { delay: 4500, disableOnInteraction: false },
+      pagination: { el: '#{{ slider_id }} .swiper-pagination', clickable: true },
+      navigation: { nextEl: '#{{ slider_id }} .swiper-button-next', prevEl: '#{{ slider_id }} .swiper-button-prev' },
+      keyboard: { enabled: true },
+      a11y: { enabled: true }
+    });
+  </script>
+{% endblock %}

@@ -1,0 +1,12 @@
+cache/
+images/
+assets/
+logs/
+backup/
+tmp/
+vendor/
+node_modules/
+.DS_Store
+Thumbs.db
+user/accounts/
+.env
