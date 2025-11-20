@@ -13,11 +13,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-      # If you use submodules in user/themes/artist, add: with: submodules: true
+      - name: "Checkout"
         uses: actions/checkout@v4
 
-      - name: Debug: show host and user (safe)
+      - name: "Debug: show host/user (safe)"
         run: |
           echo "HOST=${{ secrets.SSH_HOST }}"
           echo "USER=${{ secrets.SSH_USER }}"
@@ -25,7 +24,7 @@ jobs:
           echo "User dir:" && ls -la user || true
           echo "Artist theme:" && ls -la user/themes/artist || true
 
-      - name: Debug: SSH connectivity test
+      - name: "Debug: SSH connectivity test"
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -38,7 +37,7 @@ jobs:
             ls -ld /var/www/scottnandrew-dev/user || true
             command -v php && php -v || true
 
-      - name: Rsync user/ to DEV
+      - name: "Rsync user/ to DEV"
         uses: burnett01/rsync-deployments@5.2
         with:
           switches: -az --delete
@@ -48,7 +47,7 @@ jobs:
           remote_user: ${{ secrets.SSH_USER }}
           remote_key: ${{ secrets.SSH_KEY }}
 
-      - name: Clear Grav cache
+      - name: "Clear Grav cache"
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
