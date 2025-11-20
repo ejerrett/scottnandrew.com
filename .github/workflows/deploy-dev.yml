@@ -17,7 +17,7 @@ jobs:
       # If you use submodules in user/themes/artist, add: with: submodules: true
         uses: actions/checkout@v4
 
-      - name: Debug: show host/user (safe)
+      - name: Debug: show host and user (safe)
         run: |
           echo "HOST=${{ secrets.SSH_HOST }}"
           echo "USER=${{ secrets.SSH_USER }}"
