@@ -41,8 +41,8 @@ jobs:
         uses: burnett01/rsync-deployments@5.2
         with:
           switches: -az --delete --omit-dir-times --no-perms --no-owner --no-group
-          path: user/
-          remote_path: /var/www/scottnandrew-dev/user/
+          path: user/themes/artist/
+          remote_path: /var/www/scottnandrew-dev/user/themes/artist/
           remote_host: ${{ secrets.SSH_HOST }}
           remote_user: ${{ secrets.SSH_USER }}
           remote_key: ${{ secrets.SSH_KEY }}
