@@ -37,7 +37,7 @@ jobs:
             ls -ld /var/www/scottnandrew-dev/user || true
             command -v php && php -v || true
 
-      - name: "Rsync user/ to DEV"
+      - name: "Rsync theme only"
         uses: burnett01/rsync-deployments@5.2
         with:
           switches: -az --delete --omit-dir-times --no-perms --no-owner --no-group
