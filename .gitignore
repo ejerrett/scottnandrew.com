@@ -1,12 +1,60 @@
-cache/
-images/
-assets/
-logs/
-backup/
-tmp/
-vendor/
 node_modules/
+.env
+
+# OS/editor noise
 .DS_Store
 Thumbs.db
-user/accounts/
-.env
+*.swp
+
+# Grav runtime
+/cache/
+/logs/
+/images/
+/assets/
+/tmp/
+/backup/
+/vendor/
+
+# Ignore binary media anywhere (tweak extensions to taste)
+**/*.jpg
+**/*.jpeg
+**/*.png
+**/*.gif
+**/*.webp
+**/*.avif
+**/*.svg
+**/*.tif
+**/*.tiff
+**/*.mp4
+**/*.mov
+**/*.m4v
+**/*.webm
+**/*.mp3
+**/*.wav
+**/*.flac
+**/*.pdf
+**/*.zip
+**/*.tar
+**/*.gz
+
+
+# Ignore all of user/plugins except custom ones you explicitly allow
+/user/plugins/*
+# (uncomment and list any custom plugin folders you want in Git)
+#!/user/plugins/my-custom-plugin/
+#!/user/plugins/another-custom-plugin/
+
+# Keep everything else in /user
+!/user/
+!/user/accounts/
+!/user/config/
+!/user/pages/
+!/user/themes/
+!/user/themes/artist/**
+
+# CI and docs
+!/.github/
+!/.github/workflows/**
+!/README.md
+!/.grav-plugins.txt
+!/scripts/

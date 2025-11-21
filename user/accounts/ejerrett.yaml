@@ -1,0 +1,11 @@
+state: enabled
+email: scottnandrew@ethanjerrett.net
+fullname: 'Ethan Jerrett'
+title: Administrator
+access:
+  admin:
+    login: true
+    super: true
+  site:
+    login: true
+hashed_password: $2y$10$w3OXQUV9UFhcJbYofwO/ZOaatrjDDlxDrWq3dap0/gcBHRoLafPOC

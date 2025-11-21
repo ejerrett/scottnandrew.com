@@ -1,0 +1,26 @@
+state: enabled
+email: art@scottnandrew.com
+fullname: 'Scott Andrew'
+title: Artist
+language: en
+content_editor: default
+twofa_enabled: false
+twofa_secret: USZGP4DENNWMLNGR776L4NMFYBOT3ZL2
+avatar: {  }
+hashed_password: $2y$10$PNtKm0SZos6e8/MKA00jQeXYiQGD.tHiLoCATtYI62YqvKII2EDp6
+access:
+  site:
+    login: true
+  admin:
+    login: true
+    super: true
+    cache: true
+    configuration: true
+    pages: true
+    maintenance: true
+    statistics: true
+    plugins: true
+    themes: true
+    tools: true
+    users: true
+    flex-objects: true

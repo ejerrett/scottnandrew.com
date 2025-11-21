@@ -1,0 +1,26 @@
+state: enabled
+email: helenmariefleming@gmail.com
+fullname: Helen
+title: Contributer
+language: en
+content_editor: default
+twofa_enabled: false
+twofa_secret: 24WY2JRFEUYK6ZZPQ2WAIRMK6SZHYFLM
+avatar: {  }
+hashed_password: $2y$10$Zp33ODnpfbyOVluYGdYR0O0UoPTlX/q21SUI.bII8r0I9U6xRptgC
+access:
+  site:
+    login: true
+  admin:
+    login: true
+    super: true
+    cache: true
+    configuration: true
+    pages: true
+    maintenance: true
+    statistics: true
+    plugins: true
+    themes: true
+    tools: true
+    users: true
+    flex-objects: true
