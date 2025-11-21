@@ -56,4 +56,4 @@ jobs:
           script: |
             set -e
             cd /var/www/scottnandrew-dev
-            php bin/grav clear-cache
+            php bin/grav cache --all -n
