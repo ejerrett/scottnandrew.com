@@ -17,7 +17,8 @@
 .gallery-masonry {
   column-count: 2;
   column-gap: 12px;
-  background: #000;               /* <<< key: ensures column gap looks black */
+  background: #000;
+  background-color: #000;
 }
 
 @media (max-width: 639px) {
