@@ -1,0 +1,7 @@
+{
+  "name": "local/grav-plugin-cvdocx",
+  "type": "grav-plugin",
+  "require": {
+    "phpoffice/phpword": "^1.2"
+  }
+}

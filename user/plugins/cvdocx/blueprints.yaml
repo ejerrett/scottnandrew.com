@@ -1,0 +1,7 @@
+name: cvdocx
+version: 1.0.0
+description: Render a page-attached .docx as HTML and cache the output.
+icon: file-word-o
+author:
+  name: You
+  email: you@example.com
