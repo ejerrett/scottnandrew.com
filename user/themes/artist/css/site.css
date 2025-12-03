@@ -4,34 +4,35 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Zero-gap column masonry */
+/* Default: 2-column masonry with NO column gap */
 .masonry {
-  column-gap: 0;          /* no vertical black stripes between columns */
-  background: #000;       /* safety if page bg differs */
+  column-count: 2;
+  column-gap: 0;
 }
 
-/* Column counts by breakpoint */
-@media (min-width: 640px) { .masonry { column-count: 2; } }
-@media (min-width: 1024px){ .masonry { column-count: 3; } }
+/* Mobile: 1 column */
+@media (max-width: 639px) {
+  .masonry { column-count: 1; }
+}
 
-/* Each item must avoid breaking, and have NO margins/padding/rings */
+/* Items stack with a small vertical gap inside each column */
 .masonry-item {
   break-inside: avoid;
   -webkit-column-break-inside: avoid;
   page-break-inside: avoid;
   display: block;
-  margin: 0;              /* crucial: removes vertical gaps */
+  margin: 0 0 8px;   /* <- vertical gap between images in the SAME column */
   padding: 0;
   background: transparent;
   border: 0;
 }
 
-/* Images must be block-level and full width to remove tiny seams */
+/* Images fill column width; no stray seams */
 .masonry-item img {
   display: block;
   width: 100%;
   height: auto;
-  background: transparent; /* ensure no white tiles */
+  background: transparent;
   outline: none;
   box-shadow: none;
 }
