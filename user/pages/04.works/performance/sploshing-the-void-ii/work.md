@@ -12,7 +12,7 @@ media_order: 'DSC_0152.jpg,6893166706_3cd0f8311d_o.jpg,6893169248_f9aa814987_o.j
 
 {% include 'partials/video.html.twig' with { provider: 'vimeo', id: '40573368', title: 'Sploshing the Void (version #2)', autoplay: false, loop: false } %}
 
-Sploshing the Void II, in collaboration with Mitsuko Verdery | 2012
+**Sploshing the Void II, in collaboration with Mitsuko Verdery | 2012**
 
 The second version of this work is a kinetic multi-channel video Installation with movement-based performance by Mitsuko Verdery. This immersive installation and performance is a perceptually disorienting imagination of gazing into the void; a nauseating and hallucinogenic inter-dimensional portal, where thermographic doppelgängers loom and vanish into the distance.
 

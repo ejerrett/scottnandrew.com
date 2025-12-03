@@ -6,10 +6,11 @@ taxonomy:
     category:
         - performance
 media_order: 'D03.jpg,A020.jpg,A035.jpg,A051.jpg,A094.jpg,A0114.jpg,B094.jpg,C027.jpg,D05.jpg,DSC_0116.jpg,DSC_0126.jpg,DSC_0132.jpg,DSC_0157.jpg,DSC_0174.jpg,DSC_0183.jpg,DSC_0258.jpg,E023.jpg,E029.jpg,E044.jpg,F03.jpg'
-date: '15-11-2025 00:00'
+date: '01-10-2010 00:00'
 ---
 
 {% include 'partials/video.html.twig' with { provider: 'vimeo', id: '15996391', title: 'Art Olympics', autoplay: false, loop: false } %}
+**Art Olympics Theater | 2010**
 
 THE TRANS-MILLENNIAL CONQUISTADORS!!!
 

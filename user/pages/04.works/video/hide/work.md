@@ -6,6 +6,7 @@ date: '01-01-2009 00:00'
 taxonomy:
     category:
         - video
+media_order: 'hide screenshot.png'
 ---
 
 {% include 'partials/video.html.twig' with { provider: 'vimeo', id: '16004532', title: 'Hide', autoplay: false, loop: false } %}

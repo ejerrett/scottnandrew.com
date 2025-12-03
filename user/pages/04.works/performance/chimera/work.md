@@ -3,8 +3,6 @@ title: Chimera
 taxonomy:
     category:
         - performance
-    tag:
-        - featured
 process:
     markdown: true
     twig: true
@@ -16,9 +14,11 @@ date: '01-01-2020 00:00'
 ---
 
 {% include 'partials/video.html.twig' with { provider: 'vimeo', id: '473193113', title: 'Chimera', autoplay: false, loop: false } %}
-
+{% include 'partials/video.html.twig' with { provider: 'vimeo', id: '525191546', title: 'The Stream', autoplay: false, loop: false } %}
 **Chimera | Performance | 2020**
 
 Chimera is a dance and sound-based performance installation by Jesse Factor and Scott Andrew. It premiered at the Bloomfield Garden Club which is organized by Tina Dillman, and was supported in-part by Black Cube Nomadic Art Museum.   This work explores themes from Donna Haraway’s Cyborg Manifesto and pulls inspiration from the work of Loie Fuller.
 
 {% include 'partials/video.html.twig' with { provider: 'vimeo', id: '525191546', title: 'Chimera', autoplay: false, loop: false } %}
+{% include 'partials/video.html.twig' with { provider: 'vimeo', id: '606857173', title: 'Sketch for Chimera Version #2 - performed with Activated Anamorphs', autoplay: false, loop: false } %}
+

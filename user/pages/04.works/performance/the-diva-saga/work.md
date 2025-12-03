@@ -10,6 +10,7 @@ date: '28-01-2020 00:00'
 ---
 
 {% include 'partials/video.html.twig' with { provider: 'vimeo', id: '387794152', title: 'The Diva Saga: The Legend of the Worst Drag Queen (short edit)', autoplay: false, loop: false } %}
+**The Diva Saga: The Legend of the Worst Drag Queen | 2020**
 
 The Diva Saga: The Legend of the Worst Drag Queen, is a multi-channel video installation and live performance piece that questions constructions of sexuality, gender, and identity in a digital age and examines how Veronica Bleaus became the self-proclaimed ‘worst drag queen.’ Lampooning normative and restrictive constructions of sex, artistic judgment, and popular culture, The Diva Saga draws heavily from numerous visual and aural storytelling mediums like comic books, Japanese anime, video games, music videos, and high fantasy.
 

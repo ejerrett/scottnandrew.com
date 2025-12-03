@@ -10,6 +10,7 @@ taxonomy:
 ---
 
 {% include 'partials/video.html.twig' with { provider: 'vimeo', id: '57822690', title: 'Sploshing the Void 3', autoplay: false, loop: false } %}
+**Sploshing The Void III | 2013**
 
 A meditative animation created for display on the Digital Dome at IAIA that explores the microscopic worlds of collected organic objects. These objects insects, fish, frogs, sea urchins, wisdom teeth, flowers, pods, coral, cat's whiskers and more in a collaged visual landscape. The digital dome video is created through the use of a microscopic camera and is composited into a multilayered exploration of intimate worlds on a macro-scale. The play between micro and macro imagery enables the viewer to gain the perspective of having been shrunk in size and transported to another plane of existence. This work is related to two other iterations of the project that investigate similar ideas by setting out to expose matter as a 'useful fiction', where people's bodies are 'more like a wave than a permanent thing', to quote Richard Dawkins in his lecture on the Queer Universe.
 

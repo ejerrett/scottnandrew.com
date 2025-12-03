@@ -32,7 +32,6 @@ Thumbs.db
 **/*.mp3
 **/*.wav
 **/*.flac
-**/*.pdf
 **/*.zip
 **/*.tar
 **/*.gz

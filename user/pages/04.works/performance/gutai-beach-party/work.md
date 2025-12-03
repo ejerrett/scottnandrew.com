@@ -10,6 +10,7 @@ media_order: 'Screenshot 2025-11-19 145802.png'
 ---
 
 {% include 'partials/video.html.twig' with { provider: 'vimeo', id: '50396460', title: 'Gutai Beach Party! Documentation', autoplay: false, loop: false } %}
+**Gutai Beach Party | 2012**
 {% include 'partials/video.html.twig' with { provider: 'vimeo', id: '49125356', title: 'Gutai Beach Party!', autoplay: false, loop: false } %}
 
 Documentation of a performance/installation/live score

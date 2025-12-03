@@ -11,7 +11,7 @@ media_order: 'Screenshot 2025-11-19 150012.png'
 
 {% include 'partials/video.html.twig' with { provider: 'vimeo', id: '78964386', title: 'AutoSpa', autoplay: false, loop: false } %}
 
-AutoSpa - Performance in collaboration with Agnes Bolt, Nina Sarnelle, & Erin Womack | 2012
+**AutoSpa - Performance in collaboration with Agnes Bolt, Nina Sarnelle, & Erin Womack | 2012**
 
 A total-body spa treatment for vehicle and driver. Performed for 3-4 participants while seated inside a car, this 20-min experience includes cucumber gel facial, salon wash and style, deep tissue massage, aroma-sauna and yoga meditation.
 

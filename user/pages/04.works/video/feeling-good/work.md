@@ -6,6 +6,7 @@ date: '01-01-2011 00:00'
 taxonomy:
     category:
         - video
+media_order: 'feeling good screenshot.png'
 ---
 
 {% include 'partials/video.html.twig' with { provider: 'vimeo', id: '25045495', title: 'Feeling Good', autoplay: false, loop: false } %}

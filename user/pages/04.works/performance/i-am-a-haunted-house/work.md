@@ -2,20 +2,19 @@
 title: 'I Am A Haunted House'
 taxonomy:
     category:
-        - performance
         - mediadesign
-    tag:
-        - featured
+        - performance
 media_order: '01.jpg,02.jpg,03.jpg,04.jpg,05.jpg,06.jpg,07.jpg,08.jpg,09.jpg,10.jpg,11.jpg,12.jpg,13.jpg,14.jpg,15.jpg,16.jpg,17.jpg,18.jpg,19.jpg'
 layout:
     show_hero: '0'
 date: '31-08-2020 00:00'
 ---
 
-{% include 'partials/video.html.twig' with { provider: 'vimeo', id: '453476670' } %}
+{% include 'partials/video.html.twig' with { provider: 'vimeo', id: '453476670', title: 'I Am A Haunted House', autoplay: false, loop: false } %}
 
-I Am A Haunted House: Re-animating Joan
-a multimedia dance theater experiment
+**I Am A Haunted House: Re-animating Joan | 2020 **
+
+A multimedia dance theater experiment
 
 This project was created by Scott Andrew and Jesse Factor and was presented as a work-in-progress performance as part of the Kelly Strayhorn Theater’s Freshworks Residency. It is a multimedia dance installation and performance that is centered around the life, and mythology surrounding queer film icon Joan Crawford. The initial showing was conceived of in four parts with video interludes in-between each of the main movements.
 

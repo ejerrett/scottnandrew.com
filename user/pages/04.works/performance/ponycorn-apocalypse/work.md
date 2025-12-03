@@ -11,10 +11,10 @@ media_order: 'Aunicorns04.jpg,comp1-all.jpg,comp2-all.jpg,comp3-all.jpg,comp4-al
 ---
 
 {% include 'partials/video.html.twig' with { provider: 'vimeo', id: '87322487', title: 'Ponycorn Apocalypse', autoplay: false, loop: false } %}
-Ponycorn Apocalypse - Performance with Jonathan Armistead, Stephanie Ross, Dani Lamorte, and Harrison Apple | 2012
+**Ponycorn Apocalypse - Performance with Jonathan Armistead, Stephanie Ross, Dani Lamorte, and Harrison Apple | 2012**
 
 {% include 'partials/video.html.twig' with { provider: 'vimeo', id: '87731385', title: 'Ponycorn Apocalypse (Video Mix)', autoplay: false, loop: false } %}
-Ponycorn Apocalypse featuring Dani Lamorte, Stephanie Ross and Harrison Apple | 2014
+**Ponycorn Apocalypse featuring Dani Lamorte, Stephanie Ross and Harrison Apple | 2014**
 
 This performance was created to celebrate the end of the world.
 

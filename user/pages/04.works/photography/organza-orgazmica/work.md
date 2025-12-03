@@ -10,3 +10,8 @@ date: '01-01-2009 00:00'
 ---
 
 ![01a](01a.jpg "01a")
+**Organza Orgazmica | 2009 **
+
+Combining backgrounds in photography, video, abstract painting, performance, and installation, they focus their efforts to create cinematic narratives involving daring drag queens and a bevy of beautiful boys. United by a mutual interest in seductive fashion photography, the chintzy splendor of glitter, and the sparkliest of pop divas, Organza Orgazmica produces work that exists in a space between photography, installation, and performance, as characters sensually interact with their constructed environments.
+
+These constructions are shot digitally as well as on medium and large format film and printed digitally. There is an exuberant embrace of the sensuality of materials apparent within these works; they exhibit a joy of experimentation and an excitement in kitsch. Characters wrap themselves in the most decadent of discarded fashions and elegantly pose with glittering knickkancks. Dripping with bugle beads, curtain lace, and slick lamé, they perform a glamour otherwise reserved for the icons of Hollywood. In this performance, the characters transcend their homemade haute couture and do not simply evoke the allure of these icons, but place themselves at the same level. The performance of glamour defines it; the characters are not feigning a stance or playing dress up, but are erasing and perverting the boundaries and distinctions of Hollywood glamour and classical femininity. 

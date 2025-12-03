@@ -12,7 +12,7 @@ media_order: 'aa.jpg,01.jpg,02.jpg,03.jpg,04.jpg,05.jpg,06.jpg,b.jpg,c.jpg,dusty
 
 {% include 'partials/video.html.twig' with { provider: 'vimeo', id: '125357351', title: 'A Girl Called Dusty', autoplay: false, loop: false } %}
 
-https://www.youtube.com/watch?v=ayPL88qxySI
+{% include 'partials/video.html.twig' with { provider: 'youtube', id: 'ayPL88qxySI', title: 'VIDEO0614', autoplay: false, loop: false } %}
 
 **Dusty Says Goodbye! | Blue Moon | 2015**
 

@@ -10,6 +10,7 @@ taxonomy:
 ---
 
 {% include 'partials/video.html.twig' with { provider: 'vimeo', id: '451956108', title: 'Bloomfield Garden Club performance by Veronica Bleaus and Scott Andrew', autoplay: false, loop: false } %}
+**Bloomfield Garden Club | 2020**
 
 In August 2020, TD Projects (Tina Dillman, independent artist and curator) in partnership with Burning Well (Bill Julin, Bloomfield Resident) launched the Bloomfield Garden Club (BGC), a monthly salon highlighting local artists in residence working in dance, music, comedy, literary, visual, and/or performance art. John Musser w/  Scott Andrew performed as August Artists-in-Residence with  Naomi Chambers, and Betty Douglas w/ Rex Trimm.
 

@@ -13,8 +13,8 @@ taxonomy:
 **Narcissister is You - Video | 2013**
 
 This is a video contribution by Scott Andrew to Narcissister's exhibition at Envoy Enterprises entitled, 'Narcissister Is You’. It also appeared at 'Dirty Looks' at the Spectrum gallery.
+{% include 'partials/video.html.twig' with { provider: 'youtube', id: '4lO3PGVcn_U', title: 'How To Water LA - Exhibition Walktrough', autoplay: false, loop: false } %}
 
-https://youtu.be/4lO3PGVcn_U
 
 Narcissister is You video by Scott Andrew featured in How To Water in LA, 2015.
 https://www.facebook.com/events/1644784672474642/

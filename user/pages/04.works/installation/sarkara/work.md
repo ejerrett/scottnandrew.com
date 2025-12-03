@@ -12,7 +12,7 @@ media_order: 'IMG_4301.jpg,IMG_4218.jpg,IMG_4222.jpg,IMG_4225.jpg,IMG_4226.jpg,I
 {% include 'partials/video.html.twig' with { provider: 'vimeo', id: '86373857', title: 'śarkarā (installation view)', autoplay: false, loop: false } %}
 {% include 'partials/video.html.twig' with { provider: 'vimeo', id: '85992866', title: 'śarkarā (original projection)', autoplay: false, loop: false } %}
 
-śarkarā | Multimedia Installation | 2014
+**śarkarā | Multimedia Installation | 2014**
 
 The title śarkarā is taken from the Sanskrit word for ‘sugar’, which is the predominant material used in the installation. Alternate related definitions for śarkarā include: a hardening of the flesh, and a fragment or piece of earthenware, potsherd.
 
