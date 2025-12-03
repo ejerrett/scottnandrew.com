@@ -56,14 +56,25 @@
 
     <div class="gallery-masonry">
       {% for img in gallery %}
-        {% set full   = img.url %}
-        {% set r800  = img.resize(800).url %}
-        {% set r1200 = img.resize(1200).url %}
-        {% set r1600 = img.resize(1600).url %}
+        {% set full = img.url %}
+        {% set w = img.width %}
+        {% set h = img.height %}
+        {% set r = (h / w) %}
+
+        {# pick widths; compute exact heights from the original ratio #}
+        {% set w1 = 800  %}{% set h1 = (w1 * r)|round(0, 'ceil') %}
+        {% set w2 = 1200 %}{% set h2 = (w2 * r)|round(0, 'ceil') %}
+        {% set w3 = 1600 %}{% set h3 = (w3 * r)|round(0, 'ceil') %}
+
+        {# cropZoom to those exact boxes so it fills without padding #}
+        {% set r800  = img.cropZoom(w1, h1).url %}
+        {% set r1200 = img.cropZoom(w2, h2).url %}
+        {% set r1600 = img.cropZoom(w3, h3).url %}
+
         <a href="{{ full }}" data-full="{{ full }}" class="gallery-item">
           <img
             src="{{ r800 }}"
-            srcset="{{ r800 }} 800w, {{ r1200 }} 1200w, {{ r1600 }} 1600w"
+            srcset="{{ r800 }} {{w1}}w, {{ r1200 }} {{w2}}w, {{ r1600 }} {{w3}}w"
             sizes="(min-width: 640px) 50vw, 100vw"
             alt="{{ img.meta.alt|default(page.title ~ ' — ' ~ loop.index) }}"
           />
