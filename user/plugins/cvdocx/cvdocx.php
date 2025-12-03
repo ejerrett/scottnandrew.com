@@ -26,13 +26,13 @@ class CvdocxPlugin extends Plugin
 
         $twig = $this->grav['twig']->twig();
 
-        // Your existing call style: {{ docx_html(page, 'cv.docx')|raw }}
-        $twig->addFunction(new \Twig\TwigFunction('docx_html', function ($page, string $filename) {
+        // {{ docx_html(page)|raw }} or {{ docx_html(page, 'cv.docx')|raw }}
+        $twig->addFunction(new \Twig\TwigFunction('docx_html', function ($page, ?string $filename = null) {
             return $this->renderDocxHtml($page, $filename);
         }, ['is_safe' => ['html']]));
 
-        // Convenience: {{ cvdocx('cv.docx')|raw }} using current page
-        $twig->addFunction(new \Twig\TwigFunction('cvdocx', function (string $filename) {
+        // {{ cvdocx()|raw }} or {{ cvdocx('cv.docx')|raw }} (uses current page)
+        $twig->addFunction(new \Twig\TwigFunction('cvdocx', function (?string $filename = null) {
             $page = $this->grav['page'];
             return $this->renderDocxHtml($page, $filename);
         }, ['is_safe' => ['html']]));
@@ -42,21 +42,17 @@ class CvdocxPlugin extends Plugin
      * Render DOCX to sanitized HTML with caching.
      *
      * @param PageInterface|\Grav\Common\Page\Page $page
-     * @param string $filename
-     * @return string HTML
+     * @param string|null $filename Specific file or null to auto-pick newest .docx
      */
-    private function renderDocxHtml($page, string $filename): string
+    private function renderDocxHtml($page, ?string $filename): string
     {
         try {
-            // Resolve the file in the current page folder
-            $pageDir = dirname($page->filePath());
-            $path = $pageDir . '/' . ltrim($filename, '/');
-
-            if (!is_file($path)) {
-                return '<div class="cvdocx-error">CV file not found: ' . htmlspecialchars($filename) . '</div>';
+            $path = $this->resolveDocxPath($page, $filename);
+            if (!$path) {
+                return '<div class="cvdocx-error">No DOCX found for this page.</div>';
             }
 
-            // Build a cache key that changes when the file changes
+            // Build a cache key that changes when the chosen file changes
             $key = $this->cacheKey($page, $path);
 
             $cache = $this->grav['cache'];
@@ -72,10 +68,10 @@ class CvdocxPlugin extends Plugin
             $writer->save('php://output');
             $html = ob_get_clean() ?: '';
 
-            // Sanitize (strip style blocks + inline color/background + body wrapper)
+            // Sanitize Wordy HTML so it doesn't fight your dark theme
             $html = $this->sanitizeDocxHtml($html);
 
-            // Wrap and store
+            // Wrap for scoping
             $htmlWrapped = '<div class="cvdocx">' . $html . '</div>';
             $cache->save($key, $htmlWrapped);
 
@@ -84,6 +80,38 @@ class CvdocxPlugin extends Plugin
             $this->grav['log']->error('cvdocx render error: ' . $e->getMessage());
             return '<div class="cvdocx-error">Unable to render CV.</div>';
         }
+    }
+
+    /**
+     * If $filename provided, resolve that; otherwise pick the newest *.docx in the page folder.
+     */
+    private function resolveDocxPath($page, ?string $filename): ?string
+    {
+        $pageDir = dirname($page->filePath());
+
+        if ($filename) {
+            $path = $pageDir . '/' . ltrim($filename, '/');
+            return is_file($path) ? $path : null;
+        }
+
+        // Auto-pick newest .docx (ignore temp/hidden files)
+        $candidates = glob($pageDir . '/*.docx') ?: [];
+        $candidates = array_filter($candidates, function ($p) {
+            $bn = basename($p);
+            if ($bn[0] === '.') return false;              // hidden
+            if (preg_match('/(~|\#|\$|^~\$)/', $bn)) return false; // temp/lock files
+            return is_file($p);
+        });
+
+        if (!$candidates) {
+            return null;
+        }
+
+        usort($candidates, function ($a, $b) {
+            return (@filemtime($b) <=> @filemtime($a)); // newest first
+        });
+
+        return $candidates[0] ?? null;
     }
 
     private function cacheKey($page, string $path): string
@@ -98,20 +126,16 @@ class CvdocxPlugin extends Plugin
         // Remove <style>…</style>
         $html = preg_replace('#<style\b[^>]*>.*?</style>#is', '', $html);
 
-        // Strip inline color/background styles
+        // Strip inline color/background styles so your dark theme rules win
         $html = preg_replace_callback(
             '#\sstyle="([^"]*)"#i',
             function ($m) {
                 $style = $m[1];
 
-                // remove color & background / background-color declarations
+                // remove color & background / background-color
                 $style = preg_replace('/(^|;)\s*(color|background(?:-color)?)\s*:[^;"]*/i', '', $style);
 
-                // optionally strip font-family/size as well (uncomment if needed)
-                $style = preg_replace('/(^|;)\s*font-family\s*:[^;"]*/i', '', $style);
-                $style = preg_replace('/(^|;)\s*font-size\s*:[^;"]*/i', '', $style);
-
-                // clean up
+                // Tidy
                 $style = trim(preg_replace('/;{2,}/', ';', $style), " ;");
 
                 return $style ? ' style="' . $style . '"' : '';
