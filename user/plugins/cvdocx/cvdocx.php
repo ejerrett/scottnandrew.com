@@ -108,34 +108,47 @@ class CvdocxPlugin extends Plugin
      */
     private function resolveDocxPath($page, ?string $filename): ?string
     {
-        $pageDir = dirname($page->filePath());
+        // Prefer page->path(), fall back to dirname(filePath()).
+        $pageDir = '';
+        try {
+            if (method_exists($page, 'path')) {
+                $pageDir = rtrim($page->path(), '/'); // folder containing the .md
+            }
+            if (!$pageDir && method_exists($page, 'filePath') && $page->filePath()) {
+                $pageDir = rtrim(dirname($page->filePath()), '/');
+            }
+        } catch (\Throwable $e) {
+            $pageDir = '';
+        }
+        if (!$pageDir || !is_dir($pageDir)) {
+            throw new \RuntimeException('cvdocx: could not resolve page directory');
+        }
 
         if ($filename) {
             $path = $pageDir . '/' . ltrim($filename, '/');
             return is_file($path) ? $path : null;
         }
 
-        // Auto-pick newest .docx (ignore temp/hidden files)
+        // Auto-pick newest .docx (ignore hidden/temp/lock files)
         $candidates = glob($pageDir . '/*.docx') ?: [];
-        $candidates = array_filter($candidates, function ($p) {
+        $candidates = array_values(array_filter($candidates, function ($p) {
             $bn = basename($p);
-            if ($bn[0] === '.')
-                return false;              // hidden
-            if (preg_match('/(~|\#|\$|^~\$)/', $bn))
-                return false; // temp/lock files
+            if ($bn === '' || $bn[0] === '.')
+                return false;                   // hidden
+            if (preg_match('/(^~\$|~$|\#|\$)/', $bn))
+                return false;           // temp/lock
             return is_file($p);
-        });
+        }));
 
         if (!$candidates) {
             return null;
         }
 
         usort($candidates, function ($a, $b) {
-            return (@filemtime($b) <=> @filemtime($a)); // newest first
-        });
-
+            return (@filemtime($b) <=> @filemtime($a)); });
         return $candidates[0] ?? null;
     }
+
 
     private function cacheKey($page, string $path): string
     {
