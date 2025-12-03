@@ -28,7 +28,7 @@
   margin:0 0 12px 0;
   padding:0 !important;
   border:0 !important;
-  background:transparent !important;
+  background:black !important;
   box-shadow:none !important;
 }
 
@@ -37,7 +37,7 @@
   display:block;
   width:100%;
   height:auto;
-  background:transparent !important;   /* <-- kills the white fill */
+  background:black !important;   /* <-- kills the white fill */
   border:0 !important;
   border-radius:12px;                   /* <-- bring corners back */
   margin:0;                             /* override any prose margins */
@@ -46,7 +46,7 @@
 /* If a parent wrapper has a white bg, neutralize it for the gallery zone */
 .work-article .gallery-masonry,
 .work-article .gallery-masonry *{
-  background-color:transparent !important;
+  background-color:black !important;
 }
 
 /* If you use prose somewhere, kill default img margins inside the work body */
