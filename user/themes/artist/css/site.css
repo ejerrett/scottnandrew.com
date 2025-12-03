@@ -9,37 +9,43 @@
   --masonry-gap: 12px; /* tweak: vertical space between items + column gap */
 }
 
-/* Two columns on ≥640px, one column below */
+/* Make sure the work page and gallery don’t inherit a white background */
+.work-article { background: transparent; }
+.work-article * { background: transparent; }
+
+/* 2-col masonry; gaps should be black (match site bg) */
 .gallery-masonry {
   column-count: 2;
-  column-gap: var(--masonry-gap);
-  /* Helps avoid lonely items at column breaks */
-  orphans: 1;
-  widows: 1;
+  column-gap: 12px;
+  background: #000;               /* <<< key: ensures column gap looks black */
 }
 
 @media (max-width: 639px) {
   .gallery-masonry { column-count: 1; }
 }
 
-/* Each item must avoid breaking and reset any inherited padding/background */
+/* Items: no borders/rings/padding; proper spacing */
 .gallery-item {
   display: block;
   break-inside: avoid;
   -webkit-column-break-inside: avoid;
-  margin: 0 0 var(--masonry-gap);
+  margin: 0 0 12px;
   padding: 0;
-  background: transparent;
   border: 0;
   box-shadow: none;
+  background: transparent;
 }
 
-/* Make images fill the column width with no extra “frame” */
+/* Images: fill column width, no extra “frame” */
 .gallery-item img {
   display: block;
   width: 100%;
   height: auto;
-  background: transparent;   /* prevent white fill on transparent PNGs */
+  background: transparent;
   border: 0;
-  outline: 0;
 }
+
+/* If you use prose somewhere, kill default img margins inside the work body */
+.prose .gallery-masonry img,
+.prose .gallery-item img { margin: 0; }
+
