@@ -100,7 +100,7 @@
       window.addEventListener('keydown', e => { if(e.key==='Escape') close(); });
     })();
   </script>
-  {% set siblings = page.parent.children.order('date','desc') %}
+  {% set siblings = page.parent.children.order('desc') %}
 {% set prev = null %}
 {% set next = null %}
 {% for p in siblings %}
