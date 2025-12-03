@@ -1,20 +1,20 @@
 <?php return array(
     'root' => array(
-        'name' => 'local/grav-plugin-cvdocx',
+        'name' => 'ejerrett/cvdocx',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'e5c2f10a55ad12a0a7a0313ecd132f8cc7762690',
-        'type' => 'grav-plugin',
+        'reference' => 'a515e20295b09578b02b66550b8b24bfed1effba',
+        'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
         'dev' => false,
     ),
     'versions' => array(
-        'local/grav-plugin-cvdocx' => array(
+        'ejerrett/cvdocx' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'e5c2f10a55ad12a0a7a0313ecd132f8cc7762690',
-            'type' => 'grav-plugin',
+            'reference' => 'a515e20295b09578b02b66550b8b24bfed1effba',
+            'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
             'dev_requirement' => false,

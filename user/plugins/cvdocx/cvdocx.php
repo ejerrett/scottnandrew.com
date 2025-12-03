@@ -1,6 +1,16 @@
 <?php
 namespace Grav\Plugin;
 
+$autoload = __DIR__ . '/vendor/autoload.php';
+if (is_file($autoload)) {
+    require_once $autoload;
+} else {
+    // Optional: Fail gracefully in the page instead of a fatal error
+    if (isset($this->grav)) {
+        $this->grav['log']->warning('cvdocx: vendor/autoload.php missing; run composer install in user/plugins/cvdocx');
+    }
+}
+
 use Grav\Common\Grav;
 use Grav\Common\Plugin;
 use Grav\Common\Page\Page;

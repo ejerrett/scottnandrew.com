@@ -1,7 +1,12 @@
 {
-  "name": "local/grav-plugin-cvdocx",
-  "type": "grav-plugin",
+  "name": "ejerrett/cvdocx",
+  "type": "library",
   "require": {
     "phpoffice/phpword": "^1.2"
+  },
+  "config": {
+    "platform-check": false,
+    "optimize-autoloader": true,
+    "sort-packages": true
   }
 }
