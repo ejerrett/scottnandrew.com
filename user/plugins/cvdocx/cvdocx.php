@@ -63,7 +63,7 @@ class CvdocxPlugin extends Plugin
 
             // Load and convert to HTML
             $phpword = IOFactory::load($path);
-            $writer  = IOFactory::createWriter($phpword, 'HTML');
+            $writer = IOFactory::createWriter($phpword, 'HTML');
             ob_start();
             $writer->save('php://output');
             $html = ob_get_clean() ?: '';
@@ -98,8 +98,10 @@ class CvdocxPlugin extends Plugin
         $candidates = glob($pageDir . '/*.docx') ?: [];
         $candidates = array_filter($candidates, function ($p) {
             $bn = basename($p);
-            if ($bn[0] === '.') return false;              // hidden
-            if (preg_match('/(~|\#|\$|^~\$)/', $bn)) return false; // temp/lock files
+            if ($bn[0] === '.')
+                return false;              // hidden
+            if (preg_match('/(~|\#|\$|^~\$)/', $bn))
+                return false; // temp/lock files
             return is_file($p);
         });
 
@@ -116,36 +118,82 @@ class CvdocxPlugin extends Plugin
 
     private function cacheKey($page, string $path): string
     {
-        $route = method_exists($page, 'route') ? $page->route() : (string)$page;
+        $route = method_exists($page, 'route') ? $page->route() : (string) $page;
         $mtime = @filemtime($path) ?: 0;
         return 'cvdocx:' . md5($route . '|' . $path . '|' . $mtime);
     }
 
-    private function sanitizeDocxHtml(string $html): string
+    private function sanitizeCvHtml(string $html): string
     {
-        // Remove <style>…</style>
-        $html = preg_replace('#<style\b[^>]*>.*?</style>#is', '', $html);
+        // Allow basic structure + tables + links
+        $allowed_tags = [
+            'h1',
+            'h2',
+            'h3',
+            'h4',
+            'h5',
+            'h6',
+            'p',
+            'div',
+            'span',
+            'br',
+            'hr',
+            'strong',
+            'b',
+            'em',
+            'i',
+            'u',
+            'sup',
+            'sub',
+            'ul',
+            'ol',
+            'li',
+            'table',
+            'thead',
+            'tbody',
+            'tr',
+            'th',
+            'td',
+            'a'
+        ];
 
-        // Strip inline color/background styles so your dark theme rules win
+        // Strip all tags except the above
+        $html = strip_tags($html, '<' . implode('><', $allowed_tags) . '>');
+
+        // Whitelist a few safe attributes (href, colspan/rowspan, align)
+        // Remove everything else (especially inline styles from Word)
         $html = preg_replace_callback(
-            '#\sstyle="([^"]*)"#i',
+            '#<([a-z0-9]+)\b([^>]*)>#i',
             function ($m) {
-                $style = $m[1];
+                $tag = strtolower($m[1]);
+                $attr = $m[2];
 
-                // remove color & background / background-color
-                $style = preg_replace('/(^|;)\s*(color|background(?:-color)?)\s*:[^;"]*/i', '', $style);
-
-                // Tidy
-                $style = trim(preg_replace('/;{2,}/', ';', $style), " ;");
-
-                return $style ? ' style="' . $style . '"' : '';
+                // Keep only permitted attributes per tag
+                $keep = [];
+                if ($tag === 'a') {
+                    if (preg_match('#\bhref=("|\')(.*?)\1#i', $attr, $mm)) {
+                        $href = htmlspecialchars($mm[2], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+                        $keep[] = 'href="' . $href . '"';
+                        $keep[] = 'target="_blank"';
+                        $keep[] = 'rel="noopener"';
+                    }
+                } elseif (in_array($tag, ['td', 'th'], true)) {
+                    foreach (['colspan', 'rowspan'] as $k) {
+                        if (preg_match('#\b' . $k . '=("|\')(\d+)\1#i', $attr, $mm)) {
+                            $keep[] = strtolower($k) . '="' . $mm[2] . '"';
+                        }
+                    }
+                } elseif (in_array($tag, ['p', 'div', 'td', 'th'], true)) {
+                    if (preg_match('#\balign=("|\')(left|right|center)\1#i', $attr, $mm)) {
+                        $keep[] = 'data-align="' . $mm[2] . '"';
+                    }
+                }
+                return '<' . $tag . ($keep ? ' ' . implode(' ', $keep) : '') . '>';
             },
             $html
         );
 
-        // Remove <body> wrapper if present
-        $html = preg_replace('#</?body[^>]*>#i', '', $html);
-
         return $html;
     }
+
 }
