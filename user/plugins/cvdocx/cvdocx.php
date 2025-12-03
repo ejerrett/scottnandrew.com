@@ -44,64 +44,61 @@ class CvdocxPlugin extends Plugin
      * @param PageInterface|\Grav\Common\Page\Page $page
      * @param string|null $filename Specific file or null to auto-pick newest .docx
      */
+    // keep this one as your main entry point (unchanged signature)
     private function renderDocxHtml($page, ?string $filename): string
     {
-        try {
-            $path = $this->resolveDocxPath($page, $filename);
-            if (!$path) {
-                return '<div class="cvdocx-error">No DOCX found for this page.</div>';
-            }
-
-            // Build a cache key that changes when the chosen file changes
-            $key = $this->cacheKey($page, $path);
-
-            $cache = $this->grav['cache'];
-            $cached = $cache->fetch($key);
-            if (is_string($cached) && $cached !== '') {
-                return $cached;
-            }
-
-            // Load and convert to HTML
-            $phpword = IOFactory::load($path);
-            $writer = IOFactory::createWriter($phpword, 'HTML');
-            ob_start();
-            $writer->save('php://output');
-            $html = ob_get_clean() ?: '';
-
-            // Sanitize Wordy HTML so it doesn't fight your dark theme
-            $html = $this->sanitizeCvHtml($html);
-
-            // Wrap for scoping
-            $htmlWrapped = '<div class="cvdocx">' . $html . '</div>';
-            $cache->save($key, $htmlWrapped);
-
-            return $htmlWrapped;
-        } catch (\Throwable $e) {
-            // Always log full details
-            if (isset($this->grav['log'])) {
-                $this->grav['log']->error('cvdocx: ' . $e->getMessage() . ' at ' . $e->getFile() . ':' . $e->getLine());
-            }
-
-            $msg = htmlspecialchars($e->getMessage(), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-
-            // If Grav debug is on, or ?cvdebug=1 is present, show the message inline
-            $show = false;
-            try {
-                $show = !empty($this->grav['config']->get('system.debugger.enabled')) ||
-                    (isset($_GET['cvdebug']) && $_GET['cvdebug'] === '1');
-            } catch (\Throwable $ignored) {
-                // Silently ignore config access errors
-            }
-
-            if ($show) {
-                return '<div class="cvdocx-scope" style="color:#fca5a5">
-                  <strong>cvdocx error:</strong> ' . $msg . '
-                </div>';
-            }
-
-            return '<div class="cvdocx-scope" style="color:#fca5a5">Unable to render CV.</div>';
+        // 1) resolve a path (supports explicit filename or newest .docx)
+        $path = $this->resolveDocxPath($page, $filename);
+        if (!$path) {
+            return '<div class="cvdocx-msg">No DOCX found for this page.</div>';
         }
+
+        // 2) cache: invalidate when file mtime changes
+        $key = $this->cacheKey($path);
+        $cache = $this->grav['cache'];
+        if ($cached = $cache->get($key)) {
+            return $cached;
+        }
+
+        // 3) render the file to HTML (helper below) and cache it
+        $html = $this->renderDocxToHtml($path);
+        $cache->save($key, $html);
+
+        return $html;
     }
+
+    // helper: turn a resolved filesystem path into clean, scoped HTML
+    private function renderDocxToHtml(string $path): string
+    {
+        $phpWord = \PhpOffice\PhpWord\IOFactory::load($path, 'Word2007');
+        $writer = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'HTML');
+
+        ob_start();
+        $writer->save('php://output');
+        $html = ob_get_clean();
+
+        // keep only <body>…</body>
+        $html = preg_replace('/^.*?<body[^>]*>/is', '', $html);
+        $html = preg_replace('/<\/body>.*$/is', '', $html);
+
+        // remove inlined CSS/links that PhpWord emits
+        $html = preg_replace('#<style[^>]*>.*?</style>#is', '', $html);
+        $html = preg_replace('#<link[^>]*>#is', '', $html);
+
+        // tidy spacing
+        $html = preg_replace('#(?:<br\s*/?>\s*){3,}#i', '<br><br>', $html);
+        $html = preg_replace('#<p[^>]*>\s*(?:&nbsp;|\s)*</p>#i', '', $html);
+
+        return '<div class="cvdocx-scope">' . $html . '</div>';
+    }
+
+    // cache key that changes when the DOCX does
+    private function cacheKey(string $path): string
+    {
+        $mt = @filemtime($path) ?: 0;
+        return 'cvdocx:' . md5($path . ':' . $mt);
+    }
+
 
     /**
      * If $filename provided, resolve that; otherwise pick the newest *.docx in the page folder.
@@ -145,16 +142,9 @@ class CvdocxPlugin extends Plugin
         }
 
         usort($candidates, function ($a, $b) {
-            return (@filemtime($b) <=> @filemtime($a)); });
+            return (@filemtime($b) <=> @filemtime($a));
+        });
         return $candidates[0] ?? null;
-    }
-
-
-    private function cacheKey($page, string $path): string
-    {
-        $route = method_exists($page, 'route') ? $page->route() : (string) $page;
-        $mtime = @filemtime($path) ?: 0;
-        return 'cvdocx:' . md5($route . '|' . $path . '|' . $mtime);
     }
 
     private function sanitizeCvHtml(string $html): string
