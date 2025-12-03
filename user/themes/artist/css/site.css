@@ -58,3 +58,4 @@ If you use prose somewhere, kill default img margins inside the work body
 .prose .gallery-masonry img,
 .prose .gallery-item img { margin: 0; }
 */
+.work-article, .work-article * { background:transparent !important; }
