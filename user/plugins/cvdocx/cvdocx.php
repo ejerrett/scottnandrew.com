@@ -69,7 +69,7 @@ class CvdocxPlugin extends Plugin
             $html = ob_get_clean() ?: '';
 
             // Sanitize Wordy HTML so it doesn't fight your dark theme
-            $html = $this->sanitizeDocxHtml($html);
+            $html = $this->sanitizeCvHtml($html);
 
             // Wrap for scoping
             $htmlWrapped = '<div class="cvdocx">' . $html . '</div>';
@@ -90,6 +90,7 @@ class CvdocxPlugin extends Plugin
                 $show = !empty($this->grav['config']->get('system.debugger.enabled')) ||
                     (isset($_GET['cvdebug']) && $_GET['cvdebug'] === '1');
             } catch (\Throwable $ignored) {
+                // Silently ignore config access errors
             }
 
             if ($show) {
