@@ -4,35 +4,42 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Default: 2-column masonry with NO column gap */
-.masonry {
+/* --- Masonry Gallery (scoped, no Tailwind conflicts) --- */
+:root {
+  --masonry-gap: 12px; /* tweak: vertical space between items + column gap */
+}
+
+/* Two columns on ≥640px, one column below */
+.gallery-masonry {
   column-count: 2;
-  column-gap: 0;
+  column-gap: var(--masonry-gap);
+  /* Helps avoid lonely items at column breaks */
+  orphans: 1;
+  widows: 1;
 }
 
-/* Mobile: 1 column */
 @media (max-width: 639px) {
-  .masonry { column-count: 1; }
+  .gallery-masonry { column-count: 1; }
 }
 
-/* Items stack with a small vertical gap inside each column */
-.masonry-item {
+/* Each item must avoid breaking and reset any inherited padding/background */
+.gallery-item {
+  display: block;
   break-inside: avoid;
   -webkit-column-break-inside: avoid;
-  page-break-inside: avoid;
-  display: block;
-  margin: 0 0 8px;   /* <- vertical gap between images in the SAME column */
+  margin: 0 0 var(--masonry-gap);
   padding: 0;
   background: transparent;
   border: 0;
+  box-shadow: none;
 }
 
-/* Images fill column width; no stray seams */
-.masonry-item img {
+/* Make images fill the column width with no extra “frame” */
+.gallery-item img {
   display: block;
   width: 100%;
   height: auto;
-  background: transparent;
-  outline: none;
-  box-shadow: none;
+  background: transparent;   /* prevent white fill on transparent PNGs */
+  border: 0;
+  outline: 0;
 }
