@@ -40,7 +40,9 @@ Thumbs.db
 
 # Ignore all of user/plugins except custom ones you explicitly allow
 /user/plugins/*
+!user/plugins/
 !/user/plugins/cvdocx/
+!user/plugins/cvdocx/**
 # (uncomment and list any custom plugin folders you want in Git)
 #!/user/plugins/my-custom-plugin/
 #!/user/plugins/another-custom-plugin/
