@@ -4,45 +4,37 @@
 @tailwind components;
 @tailwind utilities;
 
-/* --- Masonry Gallery (scoped, no Tailwind conflicts) --- 
-:root {
-  --masonry-gap: 12px;
-}
-*/
-
-/* Replace multi-column with a rock-solid 2-col grid */
+/* Masonry columns */
 .gallery-masonry{
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  background: #000;                       /* black gutters */
+  column-count: 1;
+  column-gap: 14px;              /* horizontal gap (mobile) */
+}
+@media (min-width: 640px){
+  .gallery-masonry{
+    column-count: 2;
+    column-gap: 18px;            /* horizontal gap (desktop) */
+  }
 }
 
-@media (max-width: 639px){
-  .gallery-masonry{ grid-template-columns: 1fr; }
-}
-
+/* Each tile */
 .gallery-item{
-  display: block;
-  margin: 0;
-  padding: 0 !important;
-  border: 0 !important;
-  background: #000 !important;            /* wrapper paints black */
-  box-shadow: none !important;
+  display: block;                 /* ensures no inline baseline gap */
+  line-height: 0;                 /* kill any residual baseline space */
+  margin: 0 0 18px;               /* vertical gap between items */
+  break-inside: avoid;
+  -webkit-column-break-inside: avoid;
 }
 
 .gallery-item::before,
 .gallery-item::after{ display: none !important; }
 
+/* The image itself */
 .gallery-item img{
-  display: block;
+  display: block;                 /* removes bottom inline gap */
   width: 100%;
   height: auto;
-  background: transparent !important;
-  border: 0 !important;
-  border-radius: 12px;                     /* bring back the rounded corners */
-  box-shadow: none !important;
-  margin: 0;
+  border-radius: 10px;            /* keep your nice rounded corners */
+  background: transparent;        /* no white box */
 }
 
 /* Nuke any prose defaults that might add frames around images */
