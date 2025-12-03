@@ -1,19 +1,8 @@
 <?php
 namespace Grav\Plugin;
 
-$autoload = __DIR__ . '/vendor/autoload.php';
-if (is_file($autoload)) {
-    require_once $autoload;
-} else {
-    // Optional: Fail gracefully in the page instead of a fatal error
-    if (isset($this->grav)) {
-        $this->grav['log']->warning('cvdocx: vendor/autoload.php missing; run composer install in user/plugins/cvdocx');
-    }
-}
-
-use Grav\Common\Grav;
+use Grav\Common\Page\PageInterface;
 use Grav\Common\Plugin;
-use Grav\Common\Page\Page;
 use PhpOffice\PhpWord\IOFactory;
 
 class CvdocxPlugin extends Plugin
@@ -21,84 +10,118 @@ class CvdocxPlugin extends Plugin
     public static function getSubscribedEvents(): array
     {
         return [
-            'onTwigExtensions' => ['onTwigExtensions', 0],
+            'onTwigInitialized' => ['onTwigInitialized', 0],
         ];
     }
 
-    public function onTwigExtensions(): void
+    public function onTwigInitialized(): void
     {
-        $this->grav['twig']->twig()->addFunction(
-            new \Twig\TwigFunction('docx_html', function ($page, $filename = null) {
-                return $this->renderDocx($page, $filename);
-            })
-        );
+        // Ensure composer deps (PhpWord) are available
+        $autoload = __DIR__ . '/vendor/autoload.php';
+        if (is_file($autoload)) {
+            require_once $autoload;
+        } else {
+            $this->grav['log']->warning('cvdocx: vendor/autoload.php missing; run composer install in user/plugins/cvdocx');
+        }
+
+        $twig = $this->grav['twig']->twig();
+
+        // Your existing call style: {{ docx_html(page, 'cv.docx')|raw }}
+        $twig->addFunction(new \Twig\TwigFunction('docx_html', function ($page, string $filename) {
+            return $this->renderDocxHtml($page, $filename);
+        }, ['is_safe' => ['html']]));
+
+        // Convenience: {{ cvdocx('cv.docx')|raw }} using current page
+        $twig->addFunction(new \Twig\TwigFunction('cvdocx', function (string $filename) {
+            $page = $this->grav['page'];
+            return $this->renderDocxHtml($page, $filename);
+        }, ['is_safe' => ['html']]));
     }
 
-    private function renderDocx($page, $filename)
+    /**
+     * Render DOCX to sanitized HTML with caching.
+     *
+     * @param PageInterface|\Grav\Common\Page\Page $page
+     * @param string $filename
+     * @return string HTML
+     */
+    private function renderDocxHtml($page, string $filename): string
     {
-        // Resolve page
-        if (!($page instanceof Page)) {
-            $page = Grav::instance()['page'];
-        }
-        if (!$page) { return ''; }
+        try {
+            // Resolve the file in the current page folder
+            $pageDir = dirname($page->filePath());
+            $path = $pageDir . '/' . ltrim($filename, '/');
 
-        // Pick first .docx if not specified
-        $media = $page->media()->all();
-        $docxPath = null;
-        if ($filename && isset($media[$filename])) {
-            $docxPath = $media[$filename]->path();
-        } else {
-            foreach ($media as $item) {
-                if (str_ends_with(strtolower($item->path()), '.docx')) {
-                    $docxPath = $item->path();
-                    break;
-                }
+            if (!is_file($path)) {
+                return '<div class="cvdocx-error">CV file not found: ' . htmlspecialchars($filename) . '</div>';
             }
-        }
-        if (!$docxPath || !is_file($docxPath)) {
-            return ''; // nothing to render
-        }
 
-        // Cache location keyed by file mtime
-        $mtime = filemtime($docxPath) ?: time();
-        $cacheDir = Grav::instance()['locator']->findResource('user-data://cvdocx', true, true);
-        if (!is_dir($cacheDir)) {
-            mkdir($cacheDir, 0775, true);
-        }
-        $cacheFile = $cacheDir . '/' . $page->id() . '-' . $mtime . '.html';
+            // Build a cache key that changes when the file changes
+            $key = $this->cacheKey($page, $path);
 
-        if (!is_file($cacheFile)) {
-            // Convert with PhpWord
-            $phpWord = IOFactory::load($docxPath);
-            $writer = IOFactory::createWriter($phpWord, 'HTML');
+            $cache = $this->grav['cache'];
+            $cached = $cache->fetch($key);
+            if (is_string($cached) && $cached !== '') {
+                return $cached;
+            }
 
-            // Capture HTML
+            // Load and convert to HTML
+            $phpword = IOFactory::load($path);
+            $writer  = IOFactory::createWriter($phpword, 'HTML');
             ob_start();
             $writer->save('php://output');
-            $html = ob_get_clean();
+            $html = ob_get_clean() ?: '';
 
-            // Lightweight cleanups (optional)
-            // Normalize headings/lists a bit:
-            $style = <<<CSS
-<style>
-.cvdocx * { color: inherit; }
-.cvdocx h1,.cvdocx h2,.cvdocx h3 { margin: 0.6em 0 0.3em; font-weight: 600; }
-.cvdocx p { margin: 0.4em 0; }
-.cvdocx ul, .cvdocx ol { margin: 0.4em 0 0.6em 1.2em; }
-.cvdocx table { border-collapse: collapse; width: 100%; }
-.cvdocx td, .cvdocx th { border: 0; padding: 2px 4px; vertical-align: top; }
-</style>
-CSS;
+            // Sanitize (strip style blocks + inline color/background + body wrapper)
+            $html = $this->sanitizeDocxHtml($html);
 
-            $html = '<div class="cvdocx">'.$style.$html.'</div>';
+            // Wrap and store
+            $htmlWrapped = '<div class="cvdocx">' . $html . '</div>';
+            $cache->save($key, $htmlWrapped);
 
-            file_put_contents($cacheFile, $html);
-            // Garbage collect older cache files for this page
-            foreach (glob($cacheDir . '/' . $page->id() . '-*.html') as $old) {
-                if ($old !== $cacheFile) @unlink($old);
-            }
+            return $htmlWrapped;
+        } catch (\Throwable $e) {
+            $this->grav['log']->error('cvdocx render error: ' . $e->getMessage());
+            return '<div class="cvdocx-error">Unable to render CV.</div>';
         }
+    }
 
-        return file_get_contents($cacheFile) ?: '';
+    private function cacheKey($page, string $path): string
+    {
+        $route = method_exists($page, 'route') ? $page->route() : (string)$page;
+        $mtime = @filemtime($path) ?: 0;
+        return 'cvdocx:' . md5($route . '|' . $path . '|' . $mtime);
+    }
+
+    private function sanitizeDocxHtml(string $html): string
+    {
+        // Remove <style>…</style>
+        $html = preg_replace('#<style\b[^>]*>.*?</style>#is', '', $html);
+
+        // Strip inline color/background styles
+        $html = preg_replace_callback(
+            '#\sstyle="([^"]*)"#i',
+            function ($m) {
+                $style = $m[1];
+
+                // remove color & background / background-color declarations
+                $style = preg_replace('/(^|;)\s*(color|background(?:-color)?)\s*:[^;"]*/i', '', $style);
+
+                // optionally strip font-family/size as well (uncomment if needed)
+                $style = preg_replace('/(^|;)\s*font-family\s*:[^;"]*/i', '', $style);
+                $style = preg_replace('/(^|;)\s*font-size\s*:[^;"]*/i', '', $style);
+
+                // clean up
+                $style = trim(preg_replace('/;{2,}/', ';', $style), " ;");
+
+                return $style ? ' style="' . $style . '"' : '';
+            },
+            $html
+        );
+
+        // Remove <body> wrapper if present
+        $html = preg_replace('#</?body[^>]*>#i', '', $html);
+
+        return $html;
     }
 }
