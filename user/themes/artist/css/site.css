@@ -40,3 +40,38 @@
 /* Nuke any prose defaults that might add frames around images */
 .prose img{ background: transparent !important; padding: 0 !important; box-shadow: none !important; border: 0 !important; }
 
+/* CV-only scope */
+.cvdocx-scope { color: #e5e7eb; font-size: 1rem; line-height: 1.6; }
+
+.cvdocx-scope h1,
+.cvdocx-scope h2,
+.cvdocx-scope h3 { color: #fff; margin: 0.8em 0 0.4em; line-height: 1.3; }
+.cvdocx-scope h1 { font-size: 1.75rem; font-weight: 700; }
+.cvdocx-scope h2 { font-size: 1.35rem; font-weight: 650; }
+.cvdocx-scope h3 { font-size: 1.15rem; font-weight: 600; }
+
+.cvdocx-scope p { margin: 0.5em 0; }
+.cvdocx-scope strong, .cvdocx-scope b { font-weight: 700; }
+.cvdocx-scope em, .cvdocx-scope i { font-style: italic; }
+
+.cvdocx-scope ul, .cvdocx-scope ol { margin: 0.4em 0 0.8em 1.25em; }
+.cvdocx-scope li { margin: 0.25em 0; }
+
+.cvdocx-scope a { color: #93c5fd; text-decoration: underline; }
+
+.cvdocx-scope table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.8em 0;
+  color: #e5e7eb;
+}
+.cvdocx-scope th, .cvdocx-scope td {
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 0.5em 0.6em;
+  vertical-align: top;
+}
+.cvdocx-scope th { background: rgba(255,255,255,0.06); font-weight: 600; }
+
+/* Respect alignment carried via data-align */
+.cvdocx-scope [data-align="center"] { text-align: center; }
+.cvdocx-scope [data-align="right"]  { text-align: right;  }
