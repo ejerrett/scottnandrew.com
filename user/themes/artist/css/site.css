@@ -3,3 +3,35 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Zero-gap column masonry */
+.masonry {
+  column-gap: 0;          /* no vertical black stripes between columns */
+  background: #000;       /* safety if page bg differs */
+}
+
+/* Column counts by breakpoint */
+@media (min-width: 640px) { .masonry { column-count: 2; } }
+@media (min-width: 1024px){ .masonry { column-count: 3; } }
+
+/* Each item must avoid breaking, and have NO margins/padding/rings */
+.masonry-item {
+  break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+  page-break-inside: avoid;
+  display: block;
+  margin: 0;              /* crucial: removes vertical gaps */
+  padding: 0;
+  background: transparent;
+  border: 0;
+}
+
+/* Images must be block-level and full width to remove tiny seams */
+.masonry-item img {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: transparent; /* ensure no white tiles */
+  outline: none;
+  box-shadow: none;
+}

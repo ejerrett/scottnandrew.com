@@ -51,18 +51,29 @@
   {% endif %}
 
   {% if gallery|length > 0 %}
-    <section class="mt-12">
-      <h2 class="text-xl font-semibold mb-4">Gallery</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        {% for img in gallery %}
-          <a href="{{ img.url }}" class="block group" data-full="{{ img.url }}" aria-label="Open image {{ loop.index }}">
-            <img src="{{ img.url }}"
-                 alt="{{ img.meta.alt|default(page.title ~ ' — ' ~ loop.index) }}"
-                 class="w-full h-auto rounded-lg ring-1 ring-white/10 group-hover:opacity-90 transition" />
-          </a>
-        {% endfor %}
-      </div>
-    </section>
+  <section class="mt-12">
+    <h2 class="text-xl font-semibold mb-4">Gallery</h2>
+
+    {# Masonry without gaps #}
+    <div class="masonry">
+      {% for img in gallery %}
+        {% set full   = img.url %}
+        {% set r800  = img.resize(800).url %}
+        {% set r1200 = img.resize(1200).url %}
+        {% set r1600 = img.resize(1600).url %}
+
+        <a href="{{ full }}" data-full="{{ full }}" class="masonry-item">
+          <img
+            src="{{ r800 }}"
+            srcset="{{ r800 }} 800w, {{ r1200 }} 1200w, {{ r1600 }} 1600w"
+            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+            alt="{{ img.meta.alt|default(page.title ~ ' — ' ~ loop.index) }}"
+          />
+        </a>
+      {% endfor %}
+    </div>
+  </section>
+
   {% endif %}
 
 </article>
