@@ -77,8 +77,28 @@ class CvdocxPlugin extends Plugin
 
             return $htmlWrapped;
         } catch (\Throwable $e) {
-            $this->grav['log']->error('cvdocx render error: ' . $e->getMessage());
-            return '<div class="cvdocx-error">Unable to render CV.</div>';
+            // Always log full details
+            if (isset($this->grav['log'])) {
+                $this->grav['log']->error('cvdocx: ' . $e->getMessage() . ' at ' . $e->getFile() . ':' . $e->getLine());
+            }
+
+            $msg = htmlspecialchars($e->getMessage(), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+
+            // If Grav debug is on, or ?cvdebug=1 is present, show the message inline
+            $show = false;
+            try {
+                $show = !empty($this->grav['config']->get('system.debugger.enabled')) ||
+                    (isset($_GET['cvdebug']) && $_GET['cvdebug'] === '1');
+            } catch (\Throwable $ignored) {
+            }
+
+            if ($show) {
+                return '<div class="cvdocx-scope" style="color:#fca5a5">
+                  <strong>cvdocx error:</strong> ' . $msg . '
+                </div>';
+            }
+
+            return '<div class="cvdocx-scope" style="color:#fca5a5">Unable to render CV.</div>';
         }
     }
 
