@@ -4,58 +4,47 @@
 @tailwind components;
 @tailwind utilities;
 
-/* --- Masonry Gallery (scoped, no Tailwind conflicts) --- */
+/* --- Masonry Gallery (scoped, no Tailwind conflicts) --- 
 :root {
-  --masonry-gap: 12px; /* tweak: vertical space between items + column gap */
+  --masonry-gap: 12px;
 }
+*/
 
-/* --- debug: show wrapper box --- */
-.gallery-item { outline: 2px solid red; }
-
-/* final rules */
+/* Replace multi-column with a rock-solid 2-col grid */
 .gallery-masonry{
-  column-count:2;
-  column-gap:12px;
-  background:#000;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  background: #000;                       /* black gutters */
 }
-@media (max-width:639px){ .gallery-masonry{ column-count:1; } }
+
+@media (max-width: 639px){
+  .gallery-masonry{ grid-template-columns: 1fr; }
+}
 
 .gallery-item{
-  display:block;
-  break-inside:avoid;
-  -webkit-column-break-inside:avoid;
-  margin:0 0 12px;
-  padding:0 !important;                /* kill any padding that creates “frame” */
-  background:#000 !important;          /* wrapper bg = black, not white */
-  border:0 !important;
-  box-shadow:none !important;
+  display: block;
+  margin: 0;
+  padding: 0 !important;
+  border: 0 !important;
+  background: #000 !important;            /* wrapper paints black */
+  box-shadow: none !important;
 }
 
 .gallery-item::before,
-.gallery-item::after{ display:none !important; }  /* nuke any pseudo-element frames */
+.gallery-item::after{ display: none !important; }
 
 .gallery-item img{
-  display:block;
-  width:100%;
-  height:auto;
-  background:#000 !important;          /* image bg black too */
-  border:0 !important;
-  border-radius:12px;                   /* rounded corners back */
-  margin:0;
+  display: block;
+  width: 100%;
+  height: auto;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 12px;                     /* bring back the rounded corners */
+  box-shadow: none !important;
+  margin: 0;
 }
 
-/* If Tailwind Typography (prose) is adding image frames anywhere, override it */
-.prose img{ background:transparent !important; padding:0 !important; box-shadow:none !important; border:0 !important; }
+/* Nuke any prose defaults that might add frames around images */
+.prose img{ background: transparent !important; padding: 0 !important; box-shadow: none !important; border: 0 !important; }
 
-
-/* If a parent wrapper has a white bg, neutralize it for the gallery zone 
-.work-article .gallery-masonry,
-.work-article .gallery-masonry *{
-  background-color:black !important;
-}
-
-If you use prose somewhere, kill default img margins inside the work body 
-.prose .gallery-masonry img,
-.prose .gallery-item img { margin: 0; }
-*/
-.work-article, .work-article * { background:transparent !important; }
