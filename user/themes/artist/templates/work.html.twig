@@ -51,6 +51,27 @@
   {% endif %}
 
   {% if gallery|length > 0 %}
+    <style>
+    /* Force our layout to win */
+    .masonry { column-count: 2 !important; column-gap: 0 !important; }
+    @media (max-width: 639px) { .masonry { column-count: 1 !important; } }
+
+    .masonry-item { 
+      display: block !important;
+      break-inside: avoid !important;
+      -webkit-column-break-inside: avoid !important;
+      margin: 0 0 8px !important; /* vertical spacing in a column */
+      padding: 0 !important;
+      background: transparent !important;
+      border: 0 !important;
+    }
+
+    .masonry-item img {
+      display: block !important;
+      width: 100% !important;
+      height: auto !important;
+    }
+  </style>
   <section class="mt-12">
     <h2 class="text-xl font-semibold mb-4">Gallery</h2>
 
