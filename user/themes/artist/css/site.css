@@ -9,41 +9,44 @@
   --masonry-gap: 12px; /* tweak: vertical space between items + column gap */
 }
 
-/* Make sure the work page and gallery don’t inherit a white background */
-.work-article { background: transparent; }
-.work-article * { background: transparent; }
-
-/* 2-col masonry; gaps should be black (match site bg) */
-.gallery-masonry {
-  column-count: 2;
-  column-gap: 12px;
-  background: #000;
-  background-color: #000;
+/* Gallery: two columns, black gutters */
+.gallery-masonry{
+  column-count:2;
+  column-gap:12px;
+  background:#000;                 /* makes the gap look black */
 }
 
-@media (max-width: 639px) {
-  .gallery-masonry { column-count: 1; }
+@media (max-width:639px){
+  .gallery-masonry{ column-count:1; }
 }
 
-/* Items: no borders/rings/padding; proper spacing */
-.gallery-item {
-  display: block;
-  break-inside: avoid;
-  -webkit-column-break-inside: avoid;
-  margin: 0 0 12px;
-  padding: 0;
-  border: 0;
-  box-shadow: none;
-  background: transparent;
+/* Items: no padding/border; small vertical spacing */
+.gallery-item{
+  display:block;
+  break-inside:avoid;
+  -webkit-column-break-inside:avoid;
+  margin:0 0 12px 0;
+  padding:0 !important;
+  border:0 !important;
+  background:transparent !important;
+  box-shadow:none !important;
 }
 
-/* Images: fill column width, no extra “frame” */
-.gallery-item img {
-  display: block;
-  width: 100%;
-  height: auto;
-  background: transparent;
-  border: 0;
+/* Images: fill the column, NO white background, restore rounded corners */
+.gallery-item img{
+  display:block;
+  width:100%;
+  height:auto;
+  background:transparent !important;   /* <-- kills the white fill */
+  border:0 !important;
+  border-radius:12px;                   /* <-- bring corners back */
+  margin:0;                             /* override any prose margins */
+}
+
+/* If a parent wrapper has a white bg, neutralize it for the gallery zone */
+.work-article .gallery-masonry,
+.work-article .gallery-masonry *{
+  background-color:transparent !important;
 }
 
 /* If you use prose somewhere, kill default img margins inside the work body */
