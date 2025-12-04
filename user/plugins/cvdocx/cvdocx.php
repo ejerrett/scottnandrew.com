@@ -65,11 +65,99 @@ class CvdocxPlugin extends Plugin
 
         // 3) render and cache
         $html = $this->renderDocxToHtml($path);
+
+        // 1) Allow table markup
+        $allowedTags = [
+            'p',
+            'h1',
+            'h2',
+            'h3',
+            'h4',
+            'h5',
+            'h6',
+            'strong',
+            'em',
+            'u',
+            'a',
+            'ul',
+            'ol',
+            'li',
+            'br',
+            'span',
+            'sup',
+            'sub',
+            'table',
+            'tbody',
+            'thead',
+            'tr',
+            'td',
+            'th'   // <-- add these
+        ];
+
+        // keep scrubbing inline styles, but don't nuke alignment completely
+        $allowedCss = [
+            'text-align',       // to let left/right headers survive
+            'font-weight',
+            'font-style',
+            'text-decoration',
+            // (intentionally no color / font-family here)
+        ];
+
+        // after you build $html (and after purifying), run these normalizers:
+        $html = $this->cvdocxNormalizeTables($html);
+        $html = $this->cvdocxYearRows($html);
+
         $html = $this->tidyCvHtml($html);
         $cache->save($key, $html);
 
         return $html;
     }
+
+    private function cvdocxNormalizeTables(string $html): string
+    {
+        // Mark the first table as header (name, title, contact)
+        $html = preg_replace('/<table\b(?![^>]*class=)/i', '<table class="cv-header"', $html, 1);
+
+        // Any remaining plain tables become year-entry grids
+        // (don’t touch tables already carrying a class)
+        $html = preg_replace_callback(
+            '/<table\b((?:(?!class=)[^>])*)>/i',
+            function ($m) {
+                $attrs = trim($m[1] ?? '');
+                return '<table class="cv-yeargrid" ' . $attrs . '>';
+            },
+            $html,
+            -1,
+            $count
+        );
+
+        return $html;
+    }
+
+    private function cvdocxYearRows(string $html): string
+    {
+        // Heuristic: for paragraphs that begin with a year or year range and
+        // are NOT already inside a table, wrap them as "cv-row"
+        // We only touch simple <p>…</p> lines.
+        $pattern = '#<p([^>]*)>\s*(\d{4}(?:\s*[–-]\s*(?:\d{4}|Present))?)\s+(.*?)</p>#u';
+        $replace = '<div class="cv-row"><span class="cv-year">$2</span><span class="cv-detail">$3</span></div>';
+
+        // Avoid double-processing: skip if this paragraph already sits within a table
+        // by splitting on tables and only transforming outside segments
+        $parts = preg_split('#(</?table[^>]*>)#i', $html, -1, PREG_SPLIT_DELIM_CAPTURE);
+        if ($parts === false)
+            return $html;
+
+        for ($i = 0; $i < count($parts); $i++) {
+            // Outside table segments are odd indices? We used DELIM_CAPTURE, so:
+            // parts like [text, <table>, text, </table>, text ...]
+            if (!preg_match('#^</?table#i', $parts[$i] ?? '')) {
+                $parts[$i] = preg_replace($pattern, $replace, $parts[$i]);
+            }
+        }
+        return implode('', $parts);
+    }
+
 
     // helper: turn a resolved filesystem path into clean, scoped HTML
     private function renderDocxToHtml(string $path): string

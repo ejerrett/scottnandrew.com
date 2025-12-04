@@ -41,22 +41,67 @@
 .prose img{ background: transparent !important; padding: 0 !important; box-shadow: none !important; border: 0 !important; }
 
 /* CV DOCX rendering */
+/* Scope all plugin output */
 .cvdocx-scope {
-  color: #eee;
-  line-height: 1.3;
-  font-size: 1rem;
-}
-.cvdocx-scope p { margin: 0.25rem 0; }
-.cvdocx-scope a { color: inherit; text-decoration: underline; }
-.cvdocx-scope h1, .cvdocx-scope h2, .cvdocx-scope h3 {
-  margin: 1.25rem 0 0.5rem;
-  line-height: 1.2;
+  --cv-gap: 0.35rem;
+  line-height: 1.35;
+  font-size: 0.95rem;
 }
 
-/* Indent lines that belong to the current year block */
-.cvdocx-scope .cv-cont { padding-left: 1.5rem; }
+/* Header table: two cols, left/right */
+.cvdocx-scope table.cv-header {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 0.75rem;
+}
+.cvdocx-scope table.cv-header td {
+  border: 0;
+  padding: 0;
+  vertical-align: top;
+}
+.cvdocx-scope table.cv-header tr:first-child td:last-child,
+.cvdocx-scope table.cv-header tr:nth-child(2) td:last-child {
+  text-align: right;
+  white-space: nowrap;
+}
 
-/* Optional: make headings stand out slightly on dark bg */
-.cvdocx-scope h1, .cvdocx-scope h2 { font-weight: 600; }
+/* Year grid produced by Word (tables) */
+.cvdocx-scope table.cv-yeargrid {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 0.5rem 0;
+}
+.cvdocx-scope table.cv-yeargrid td,
+.cvdocx-scope table.cv-yeargrid th {
+  border: 0; padding: 0.15rem 0 0.15rem 0;
+  vertical-align: top;
+}
+.cvdocx-scope table.cv-yeargrid td:first-child,
+.cvdocx-scope table.cv-yeargrid th:first-child {
+  width: 7ch;           /* fits "2014–Present" */
+  white-space: nowrap;
+  text-align: right;
+  padding-right: 0.9rem;
+}
+.cvdocx-scope table.cv-yeargrid td:last-child { padding-left: 0; }
 
+/* Year rows synthesized from <p> lines (no tables in source) */
+.cvdocx-scope .cv-row {
+  display: grid;
+  grid-template-columns: 7ch 1fr;
+  column-gap: 0.9rem;
+  margin: 0.15rem 0;
+}
+.cvdocx-scope .cv-year   { text-align: right; white-space: nowrap; }
+.cvdocx-scope .cv-detail { min-width: 0; }
 
+/* Tighten headings like TEACHING / EDUCATION */
+.cvdocx-scope h2, .cvdocx-scope h3 {
+  margin: 0.8rem 0 0.35rem;
+  letter-spacing: .02em;
+}
+
+/* Normalize links, lists, paragraphs */
+.cvdocx-scope a { text-decoration: underline; }
+.cvdocx-scope p { margin: 0.2rem 0; }
+.cvdocx-scope ul, .cvdocx-scope ol { margin: 0.25rem 0 0.5rem 1.2rem; }
