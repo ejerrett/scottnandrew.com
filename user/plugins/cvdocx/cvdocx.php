@@ -65,6 +65,7 @@ class CvdocxPlugin extends Plugin
 
         // 3) render and cache
         $html = $this->renderDocxToHtml($path);
+        $html = $this->tidyCvHtml($html);
         $cache->save($key, $html);
 
         return $html;
@@ -150,77 +151,39 @@ class CvdocxPlugin extends Plugin
         return $candidates[0] ?? null;
     }
 
-    private function sanitizeCvHtml(string $html): string
+    /**
+     * Normalize PhpWord HTML: remove inline colors/fonts, unwrap spans,
+     * and add an indent class to paragraphs that DON'T start with a year.
+     */
+    private function tidyCvHtml(string $html): string
     {
-        // Allow basic structure + tables + links
-        $allowed_tags = [
-            'h1',
-            'h2',
-            'h3',
-            'h4',
-            'h5',
-            'h6',
-            'p',
-            'div',
-            'span',
-            'br',
-            'hr',
-            'strong',
-            'b',
-            'em',
-            'i',
-            'u',
-            'sup',
-            'sub',
-            'ul',
-            'ol',
-            'li',
-            'table',
-            'thead',
-            'tbody',
-            'tr',
-            'th',
-            'td',
-            'a'
-        ];
+        // Drop any embedded <style> blocks from PhpWord
+        $html = preg_replace('~<style\b[^>]*>.*?</style>~is', '', $html);
 
-        // Strip all tags except the above
-        $html = strip_tags($html, '<' . implode('><', $allowed_tags) . '>');
+        // Remove inline CSS that forces black text / fonts from Word
+        $html = preg_replace('~\s*color\s*:\s*#[0-9a-fA-F]{3,6}\s*;?~i', '', $html);
+        $html = preg_replace('~\s*font-family\s*:\s*[^;"]+;?~i', '', $html);
+        $html = preg_replace('~\s*font-size\s*:\s*[^;"]+;?~i', '', $html);
 
-        // Whitelist a few safe attributes (href, colspan/rowspan, align)
-        // Remove everything else (especially inline styles from Word)
-        $html = preg_replace_callback(
-            '#<([a-z0-9]+)\b([^>]*)>#i',
-            function ($m) {
-                $tag = strtolower($m[1]);
-                $attr = $m[2];
+        // Clean empty style=""
+        $html = preg_replace('~\sstyle="(\s*;?\s*)*"~i', '', $html);
 
-                // Keep only permitted attributes per tag
-                $keep = [];
-                if ($tag === 'a') {
-                    if (preg_match('#\bhref=("|\')(.*?)\1#i', $attr, $mm)) {
-                        $href = htmlspecialchars($mm[2], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-                        $keep[] = 'href="' . $href . '"';
-                        $keep[] = 'target="_blank"';
-                        $keep[] = 'rel="noopener"';
-                    }
-                } elseif (in_array($tag, ['td', 'th'], true)) {
-                    foreach (['colspan', 'rowspan'] as $k) {
-                        if (preg_match('#\b' . $k . '=("|\')(\d+)\1#i', $attr, $mm)) {
-                            $keep[] = strtolower($k) . '="' . $mm[2] . '"';
-                        }
-                    }
-                } elseif (in_array($tag, ['p', 'div', 'td', 'th'], true)) {
-                    if (preg_match('#\balign=("|\')(left|right|center)\1#i', $attr, $mm)) {
-                        $keep[] = 'data-align="' . $mm[2] . '"';
-                    }
-                }
-                return '<' . $tag . ($keep ? ' ' . implode(' ', $keep) : '') . '>';
-            },
-            $html
-        );
+        // Unwrap spans so we’re not fighting span soup
+        $html = preg_replace('~</?span\b[^>]*>~i', '', $html);
+
+        // Add indent class to <p> that do NOT begin with a year (e.g., "2024", "2019–")
+        // Leave true year lines alone.
+        $html = preg_replace_callback('~<p([^>]*)>(.*?)</p>~is', function ($m) {
+            $text = trim(strip_tags($m[2]));
+            // match 4-digit year at start, optionally followed by dash/en-dash/em-dash/space
+            if ($text === '' || preg_match('~^(19|20)\d{2}(\s|–|-|—)~u', $text)) {
+                return "<p{$m[1]}>{$m[2]}</p>";
+            }
+            return "<p class=\"cv-cont\"{$m[1]}>{$m[2]}</p>";
+        }, $html);
 
         return $html;
     }
+
 
 }
