@@ -40,57 +40,37 @@
 /* Nuke any prose defaults that might add frames around images */
 .prose img{ background: transparent !important; padding: 0 !important; box-shadow: none !important; border: 0 !important; }
 
-/* ---- CV layout tuning ---- */
+/* CV layout */
 .cvdocx-scope {
-  --cv-year-col: 9ch;      /* make room for '2014–Present' comfortably */
-  --cv-gutter: 1.1rem;     /* space between year and detail */
+  --cv-year-col: 11ch;      /* width of year column */
+  --cv-gutter: 1.2rem;      /* space between columns */
+  line-height: 1.35;
+  font-size: 0.95rem;
 }
 
-/* TABLE output from Word */
-.cvdocx-scope table.cv-yeargrid {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 0 0 .5rem 0;
-}
-.cvdocx-scope table.cv-yeargrid td,
-.cvdocx-scope table.cv-yeargrid th {
-  border: 0;
-  padding: .15rem 0;
-  vertical-align: top;
-}
-.cvdocx-scope table.cv-yeargrid td:first-child,
-.cvdocx-scope table.cv-yeargrid th:first-child {
-  width: var(--cv-year-col);
-  min-width: var(--cv-year-col);
-  text-align: right;
-  white-space: nowrap;
-  padding-right: var(--cv-gutter);
-}
-.cvdocx-scope table.cv-yeargrid td:last-child,
-.cvdocx-scope table.cv-yeargrid th:last-child {
-  padding-left: 0;            /* keep the visual gutter only once */
-}
-
-/* SYNTHESIZED rows (when the DOCX didn’t use tables) */
 .cvdocx-scope .cv-row {
   display: grid;
   grid-template-columns: var(--cv-year-col) 1fr;
   column-gap: var(--cv-gutter);
   align-items: start;
-  margin: .15rem 0;
-}
-.cvdocx-scope .cv-year {
-  text-align: right;
-  white-space: nowrap;
-}
-.cvdocx-scope .cv-detail {
-  min-width: 0;
-  /* Ensure it never hugs the left edge: */
-  padding-left: 0;            /* gutter handled by grid gap */
+  margin: 0.35rem 0;
 }
 
-/* Tighten paragraphs a hair for CV feel */
-.cvdocx-scope p { margin: .18rem 0; }
+.cvdocx-scope .cv-year {
+  color: #ddd;
+  white-space: nowrap;
+}
+
+.cvdocx-scope .cv-detail {
+  color: inherit;
+}
+
+/* fallback hanging indent for any unconverted <p> */
+.cvdocx-scope .cv-body > p {
+  padding-left: calc(var(--cv-year-col) + var(--cv-gutter));
+  text-indent: calc(-1 * (var(--cv-year-col) + var(--cv-gutter)));
+  margin: 0.35rem 0;
+}
 
 .cvdocx-scope .cv-year   { outline: 1px dashed rgba(255,255,255,.15); }
 .cvdocx-scope .cv-detail { outline: 1px dashed rgba(0,255,200,.15); }

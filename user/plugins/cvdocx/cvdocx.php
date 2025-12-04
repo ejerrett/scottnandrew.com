@@ -14,6 +14,81 @@ class CvdocxPlugin extends Plugin
         ];
     }
 
+    // Add this helper inside the class
+    private function postProcessHtml(string $html): string
+    {
+        // Scope wrapper so styles don't leak
+        $html = '<div class="cvdocx-scope"><div class="cv-body">' . $html . '</div></div>';
+
+        libxml_use_internal_errors(true);
+        $dom = new \DOMDocument('1.0', 'UTF-8');
+        $dom->loadHTML('<?xml encoding="UTF-8">' . $html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        libxml_clear_errors();
+
+        $xp = new \DOMXPath($dom);
+
+        // Matches:
+        //  2026 …
+        //  2024–2025 …
+        //  2014 - Present …
+        //  2014–Present …
+        $yearPattern = '/^\s*(\d{4})(?:\s*[–—\-]\s*(Present|\d{4}))?\s+(.*)$/u';
+
+        foreach ($xp->query('//div[contains(@class,"cv-body")]//p') as $p) {
+            /** @var \DOMElement $p */
+            $text = trim($p->textContent ?? '');
+            if ($text === '' || !preg_match($yearPattern, $text, $m)) {
+                continue; // leave headings/other lines alone
+            }
+
+            $year = $m[1] . (isset($m[2]) && $m[2] !== '' ? '–' . $m[2] : '');
+            $detailText = $m[3];
+
+            // Build row
+            $row = $dom->createElement('div');
+            $row->setAttribute('class', 'cv-row');
+
+            $yearEl = $dom->createElement('div');
+            $yearEl->setAttribute('class', 'cv-year');
+            $yearEl->appendChild($dom->createTextNode($year));
+
+            $detailEl = $dom->createElement('div');
+            $detailEl->setAttribute('class', 'cv-detail');
+
+            // Recreate inner HTML of <p>, then strip the leading year/range
+            $inner = '';
+            foreach (iterator_to_array($p->childNodes) as $cn) {
+                $inner .= $dom->saveHTML($cn);
+            }
+            $innerClean = preg_replace(
+                '/^\s*' . preg_quote($m[1], '/') . '(?:\s*[–—\-]\s*(?:Present|\d{4}))?\s+/u',
+                '',
+                $inner,
+                1
+            );
+            if ($innerClean === null || $innerClean === '' || $innerClean === $inner) {
+                $innerClean = htmlspecialchars($detailText, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+            }
+
+            $frag = $dom->createDocumentFragment();
+            $frag->appendXML($innerClean);
+            $detailEl->appendChild($frag);
+
+            $row->appendChild($yearEl);
+            $row->appendChild($detailEl);
+
+            $p->parentNode->replaceChild($row, $p);
+        }
+
+        $out = $dom->saveHTML();
+
+        // In case Word styles were dumped as literal text at the very top, trim them
+        $out = preg_replace('/^.*?body\s*\{[^}]+\}.*?\}/s', '', $out, 1) ?? $out;
+
+        return $out;
+    }
+
+
     public function onTwigInitialized(): void
     {
         // Ensure composer deps (PhpWord) are available
@@ -181,6 +256,8 @@ class CvdocxPlugin extends Plugin
         $html = preg_replace('#(?:<br\s*/?>\s*){3,}#i', '<br><br>', $html);
         $html = preg_replace('#<p[^>]*>\s*(?:&nbsp;|\s)*</p>#i', '', $html);
 
+        $html = $this->postProcessHtml($html);
+        
         return '<div class="cvdocx-scope">' . $html . '</div>';
     }
 
