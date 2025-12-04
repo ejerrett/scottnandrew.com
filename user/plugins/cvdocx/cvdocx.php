@@ -56,11 +56,14 @@ class CvdocxPlugin extends Plugin
         // 2) cache: invalidate when file mtime changes
         $key = $this->cacheKey($path);
         $cache = $this->grav['cache'];
-        if ($cached = $cache->get($key)) {
+
+        // Grav returns false on cache miss
+        $cached = $cache->fetch($key);
+        if ($cached !== false) {
             return $cached;
         }
 
-        // 3) render the file to HTML (helper below) and cache it
+        // 3) render and cache
         $html = $this->renderDocxToHtml($path);
         $cache->save($key, $html);
 
