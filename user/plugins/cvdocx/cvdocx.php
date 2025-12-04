@@ -27,66 +27,123 @@ class CvdocxPlugin extends Plugin
 
         $xp = new \DOMXPath($dom);
 
-        // Matches:
+        // YEAR forms we accept:
         //  2026 …
         //  2024–2025 …
         //  2014 - Present …
         //  2014–Present …
-        $yearPattern = '/^\s*(\d{4})(?:\s*[–—\-]\s*(Present|\d{4}))?\s+(.*)$/u';
+        $yearPattern = '/^\s*(\d{4})(?:\s*[–—\-]\s*(Present|\d{4}))?\b(.*)$/u';
 
-        foreach ($xp->query('//div[contains(@class,"cv-body")]//p') as $p) {
-            /** @var \DOMElement $p */
+        // Which tags should break the "year block"
+        $breakTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
+
+        // Work on a live list: gather <p> under our scope in document order
+        $paras = iterator_to_array($xp->query('//div[contains(@class,"cv-body")]//p'));
+        $inYearBlock = false;
+
+        foreach ($paras as $p) {
+            if (!$p->parentNode)
+                continue;
             $text = trim($p->textContent ?? '');
-            if ($text === '' || !preg_match($yearPattern, $text, $m)) {
-                continue; // leave headings/other lines alone
+
+            // Blank lines just end a block
+            if ($text === '') {
+                $inYearBlock = false;
+                continue;
             }
 
-            $year = $m[1] . (isset($m[2]) && $m[2] !== '' ? '–' . $m[2] : '');
-            $detailText = $m[3];
-
-            // Build row
-            $row = $dom->createElement('div');
-            $row->setAttribute('class', 'cv-row');
-
-            $yearEl = $dom->createElement('div');
-            $yearEl->setAttribute('class', 'cv-year');
-            $yearEl->appendChild($dom->createTextNode($year));
-
-            $detailEl = $dom->createElement('div');
-            $detailEl->setAttribute('class', 'cv-detail');
-
-            // Recreate inner HTML of <p>, then strip the leading year/range
-            $inner = '';
-            foreach (iterator_to_array($p->childNodes) as $cn) {
-                $inner .= $dom->saveHTML($cn);
-            }
-            $innerClean = preg_replace(
-                '/^\s*' . preg_quote($m[1], '/') . '(?:\s*[–—\-]\s*(?:Present|\d{4}))?\s+/u',
-                '',
-                $inner,
-                1
-            );
-            if ($innerClean === null || $innerClean === '' || $innerClean === $inner) {
-                $innerClean = htmlspecialchars($detailText, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+            // If this <p> is inside or preceded by a heading, end block
+            $tag = strtolower($p->nodeName);
+            if (in_array($tag, $breakTags, true)) {
+                $inYearBlock = false;
+                continue;
             }
 
-            $frag = $dom->createDocumentFragment();
-            $frag->appendXML($innerClean);
-            $detailEl->appendChild($frag);
+            if (preg_match($yearPattern, $text, $m)) {
+                // New year row
+                $inYearBlock = true;
 
-            $row->appendChild($yearEl);
-            $row->appendChild($detailEl);
+                $year = $m[1] . (isset($m[2]) && $m[2] !== '' ? '–' . $m[2] : '');
 
-            $p->parentNode->replaceChild($row, $p);
+                // reconstruct original inner HTML then strip the leading year/range once
+                $inner = '';
+                foreach (iterator_to_array($p->childNodes) as $cn) {
+                    $inner .= $dom->saveHTML($cn);
+                }
+                $innerClean = preg_replace(
+                    '/^\s*' . preg_quote($m[1], '/') . '(?:\s*[–—\-]\s*(?:Present|\d{4}))?\s*/u',
+                    '',
+                    $inner,
+                    1
+                );
+                if ($innerClean === null || $innerClean === '') {
+                    $innerClean = htmlspecialchars(trim($m[3] ?? ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+                }
+
+                $row = $dom->createElement('div');
+                $row->setAttribute('class', 'cv-row');
+
+                $yearEl = $dom->createElement('div');
+                $yearEl->setAttribute('class', 'cv-year');
+                $yearEl->appendChild($dom->createTextNode($year));
+
+                $detailEl = $dom->createElement('div');
+                $detailEl->setAttribute('class', 'cv-detail');
+                $frag = $dom->createDocumentFragment();
+                $frag->appendXML($innerClean);
+                $detailEl->appendChild($frag);
+
+                $row->appendChild($yearEl);
+                $row->appendChild($detailEl);
+
+                $p->parentNode->replaceChild($row, $p);
+                continue;
+            }
+
+            // Not a year line:
+            if ($inYearBlock) {
+                // Convert this paragraph into a right-column-only row
+                $row = $dom->createElement('div');
+                $row->setAttribute('class', 'cv-row');
+
+                $yearEl = $dom->createElement('div');
+                $yearEl->setAttribute('class', 'cv-year');
+                // keep empty cell to align grid
+                $yearEl->appendChild($dom->createTextNode(''));
+
+                $detailEl = $dom->createElement('div');
+                $detailEl->setAttribute('class', 'cv-detail');
+
+                // Preserve inner HTML
+                $inner = '';
+                foreach (iterator_to_array($p->childNodes) as $cn) {
+                    $inner .= $dom->saveHTML($cn);
+                }
+                $frag = $dom->createDocumentFragment();
+                // guard in case inner has stray top-level text that needs escaping
+                if (@$frag->appendXML($inner) === false) {
+                    $detailEl->appendChild($dom->createTextNode($text));
+                } else {
+                    $detailEl->appendChild($frag);
+                }
+
+                $row->appendChild($yearEl);
+                $row->appendChild($detailEl);
+
+                $p->parentNode->replaceChild($row, $p);
+            } else {
+                // Outside a year block: leave paragraph as-is
+            }
         }
 
         $out = $dom->saveHTML();
 
-        // In case Word styles were dumped as literal text at the very top, trim them
+        // Trim any dumped inline Word CSS blob that sometimes appears at the top
         $out = preg_replace('/^.*?body\s*\{[^}]+\}.*?\}/s', '', $out, 1) ?? $out;
 
         return $out;
     }
+
 
 
     public function onTwigInitialized(): void
@@ -257,7 +314,7 @@ class CvdocxPlugin extends Plugin
         $html = preg_replace('#<p[^>]*>\s*(?:&nbsp;|\s)*</p>#i', '', $html);
 
         $html = $this->postProcessHtml($html);
-        
+
         return '<div class="cvdocx-scope">' . $html . '</div>';
     }
 
