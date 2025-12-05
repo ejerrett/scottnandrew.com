@@ -101,7 +101,3 @@
 .cvdocx-scope .cv-section-break {
   margin-top: 1.25rem;
 }
-
-
-.cvdocx-scope .cv-year   { outline: 1px dashed rgba(255,255,255,.15); }
-.cvdocx-scope .cv-detail { outline: 1px dashed rgba(0,255,200,.15); }
