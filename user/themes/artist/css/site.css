@@ -72,5 +72,36 @@
   margin: 0.35rem 0;
 }
 
+/* CV section headings */
+.cvdocx-scope h1,
+.cvdocx-scope h2,
+.cvdocx-scope h3 {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  color: #eee;
+  margin: 2rem 0 0.75rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid rgba(255,255,255,0.12);
+}
+
+.cvdocx-scope h1 { font-size: 1.8rem; }
+.cvdocx-scope h2 { font-size: 1.35rem; }
+.cvdocx-scope h3 { font-size: 1.15rem; }
+
+/* Slightly larger first heading on the page */
+.cvdocx-scope .cv-body > h1:first-child,
+.cvdocx-scope .cv-body > h2:first-child {
+  margin-top: 0;
+  border-top: none;
+  padding-top: 0;
+}
+
+/* Extra space before each major section block of rows */
+.cvdocx-scope .cv-section-break {
+  margin-top: 1.25rem;
+}
+
+
 .cvdocx-scope .cv-year   { outline: 1px dashed rgba(255,255,255,.15); }
 .cvdocx-scope .cv-detail { outline: 1px dashed rgba(0,255,200,.15); }
