@@ -108,9 +108,9 @@
           {% endif %}
 
           {% if src == 'featured' %}
-            {% set preview = s.collection({'items': {'@taxonomy': {'tag': ['featured']}}, 'order': {'by': oby, 'dir': dir}}).slice(0,5) %}
+            {% set preview = s.collection({'items': {'@taxonomy': {'tag': ['featured']}}, 'order': {'by': oby, 'dir': dir}}).slice(0,0) %}
           {% else %}
-            {% set preview = s.collection({'items': {'@taxonomy': {'category': [cat]}}, 'order': {'by': oby, 'dir': dir}}).slice(0,5) %}
+            {% set preview = s.collection({'items': {'@taxonomy': {'category': [cat]}}, 'order': {'by': oby, 'dir': dir}}).slice(0,0) %}
           {% endif %}
 
           {% if preview|length %}
